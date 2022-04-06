@@ -1,0 +1,3 @@
+	logpath="log/"
+	remoteHost = "89.20.134.2"
+	remotePort = 34221

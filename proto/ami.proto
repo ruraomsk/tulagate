@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "./;proto";
+
+// AMI Service
+service AMI {
+  // Run функция двухстороннего обмена данными
+  rpc Run(stream RequestRun) returns (stream ResponseRun) {};
+}
+
+// The request message
+message RequestRun {
+  // ID контроллера в формате UUID
+  string controller_id = 1;
+  // Идентификатор действия (например, "set_mode")
+  string action = 2;
+  // тело запроса, json структура, преобразованная в строку 
+  string body = 3;
+  // Наименование протокола
+  string protocol = 4;
+}
+
+// The response message
+message ResponseRun {
+  // ID контроллера в формате UUID
+  string controller_id = 1;
+  // Идентификатор действия (например, "status")
+  string action = 2;
+  // тело запроса, json структура, преобразованная в строку 
+  string body = 3;
+}

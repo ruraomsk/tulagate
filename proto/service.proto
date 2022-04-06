@@ -1,0 +1,51 @@
+syntax = "proto3"; // Версия protobuf
+package proto; // Наименование пакета для работы с процедурами
+option go_package = "./;proto";
+
+
+// Описание сервиса
+service Service {
+    rpc TrafficLightsControllersList(NoArguments) returns (TrafficLightsControllers){};
+}
+
+// Отсутствие аргумента для вызываемой процедуры
+message NoArguments {}
+
+// Информация о контроллерах
+message TrafficLightsControllers {
+    // Перечень контроллеров
+    repeated TrafficLightsController data = 1;
+}
+
+// Информация о контроллера
+message TrafficLightsController {
+    // Идентификатор контроллера в спецификации UUID v4
+    string id = 1;
+	// Адрес, где расположен контроллер, на кириллице
+	TextField address_ru = 2;
+	// Адрес, где расположен контроллер, на латинице
+	TextField address_latin = 3;
+	// Идентификатор последней применённой адаптивной программы
+	AdaptiveProgrammInformation last_programm_id = 4;
+	// Геометрия контроллера (точка вставки)
+	GeoPoint geom = 5;
+}
+
+// Указатель на информацию об идентификаторе адаптивной программы
+message AdaptiveProgrammInformation {
+    // Идентификатор адаптивной программы в спецификации UUID v4
+    string id = 1;
+}
+
+// Реализация геоточки
+message GeoPoint {
+    // Долгота
+    double longitude = 1;
+    // Широта
+    double latitude = 2;
+}
+
+// Указатель на текстовое поле
+message TextField {
+    string text = 1;
+}
