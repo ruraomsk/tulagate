@@ -2,19 +2,19 @@ package controller
 
 // Status Периодическое (например, раз в сек) получение текущего статуса контроллера. Инициатор действия клиент.В теле ответа возвращается структура:
 type Status struct {
-	ProNumber              int              `json:"program_number"`         // Номер программы
-	PhaseNumber            int              `json:"phase_number"`           // Номер фазы
-	TactNumber             int              `json:"tact_number"`            // Номер такта в фазе
-	TactTick               int              `json:"tact_tick"`              // Тик такта
-	HoldPhase              int              `json:"hold_phase_number"`      // Номер фазы для удержания
+	Program_number         int              `json:"program_number"`         // Номер программы
+	Phase_number           int              `json:"phase_number"`           // Номер фазы
+	Tact_number            int              `json:"tact_number"`            // Номер такта в фазе
+	Tact_tick              int              `json:"tact_tick"`              // Тик такта
+	Hold_phase_number      int              `json:"hold_phase_number"`      // Номер фазы для удержания
 	Host                   string           `json:"host"`                   // IP адрес подключенного устройства
 	Port                   int              `json:"port"`                   // Порт подключенного устройства
 	State                  int              `json:"state"`                  // Статус контроллера в сети: 0 - нет связи, 1 - есть связь нет управления, 2 - есть связь есть управление
 	Errors                 Errors           `json:"errors"`                 // Описание ошибок
 	Mode                   int              `json:"mode"`                   // Текущий режим: 1 - локальный, 2 - удаленное (центральное) управление, 3 - желтое мигание, 4 - кругом красный, 5 - все светофоры выключенны, 6 - ручное (местное) управление, 7 - удержание фазы, 8 - зеленая улица
-	Time                   int64            `json:"timestamp"`              // Время на контроллере
+	Timestamp              int64            `json:"timestamp"`              // Время на контроллере
 	VAC                    float64          `json:"vac"`                    // Текущее напряжение на контроллере
-	Channels_powers        []float64        `json:"channels_powers"`        // Массив потребляемой мощьности по каналам контроллера
+	Channels_powers        []float64        `json:"channels_powers"`        // Массив потребляемой мощности по каналам контроллера
 	Channels_state         []Channels_state `json:"channels_state"`         // Состояния каналов контроллера
 	Conflict_config        bool             `json:"conflict_config"`        // Флаг наличия конфликта конфигураций
 	Hold_phase_time_remain int              `json:"hold_phase_time_remain"` // Таймер обратного отсчета до конца удержания фазы, в сек
@@ -47,7 +47,7 @@ type SetMode struct {
 	Is_enabled bool `json:"is_enabled"` // Включить / Выключить
 }
 
-//HoldPhase Включение удержания заднной фазы. Переводит поле mode в структуре ответа на действие Status в значение "удержание фазы". Инициатор действия сервер. В теле запроса приходит следующая структура:
+//HoldPhase Включение удержания заданной фазы. Переводит поле mode в структуре ответа на действие Status в значение "удержание фазы". Инициатор действия сервер. В теле запроса приходит следующая структура:
 type HoldPhase struct {
 	Phase_number int  `json:"phase_number"` // Номер фазы
 	Max_duration int  `json:"max_duration"` // Максимальное время удержания фазы в секундах
@@ -77,4 +77,13 @@ type Phase struct {
 }
 type ErrorString struct {
 	Message string `json:"error"`
+}
+type MessageFromAmi struct {
+	Action string
+	Body   string
+}
+type MessageToAmi struct {
+	IDExternal string
+	Action     string
+	Body       string
 }
