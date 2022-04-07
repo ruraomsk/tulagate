@@ -9,6 +9,7 @@
 	user= "postgres"
 	password= "162747"
 	dbname= "agserv"
+	step=5
 [agserver]
 	host= "192.168.115.25"
 	portc= 2001					#Порт приема команд от сервера АРМ

@@ -1,0 +1,29 @@
+{
+    "dkset": [
+        {
+            "idext": "device1",
+            "area": 1,
+            "id": 1
+        },
+        {
+            "idext": "device2",
+            "area": 1,
+            "id": 6
+        },
+        {
+            "idext": "device3",
+            "area": 1,
+            "id": 7
+        },
+        {
+            "idext": "device4",
+            "area": 1,
+            "id": 8
+        },
+        {
+            "idext": "device5",
+            "area": 1,
+            "id": 11
+        }
+    ]
+}

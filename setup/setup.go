@@ -21,6 +21,7 @@ type DataBase struct {
 	User     string `toml:"user"`
 	Password string `toml:"password"`
 	DBname   string `toml:"dbname"`
+	Step     int    `toml:"step"`
 }
 
 //CommServer настройки для сервера коммуникации

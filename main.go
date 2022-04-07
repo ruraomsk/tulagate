@@ -6,14 +6,20 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"runtime"
+	"time"
 
 	"github.com/BurntSushi/toml"
 
 	"github.com/ruraomsk/ag-server/logger"
 
+	"github.com/ruraomsk/tulagate/agtransport"
 	"github.com/ruraomsk/tulagate/controller"
+	"github.com/ruraomsk/tulagate/db"
+	"github.com/ruraomsk/tulagate/device"
 	"github.com/ruraomsk/tulagate/setup"
+	"github.com/ruraomsk/tulagate/uptransport"
 )
 
 // var (
@@ -57,5 +63,19 @@ func init() {
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-
+	logger.Info.Print("Start tulagate")
+	db.Starter(&dkset)
+	device.Starter(&dkset)
+	agtransport.Starter()
+	uptransport.Starter()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+loop:
+	for {
+		<-c
+		fmt.Println("\nWait make abort...")
+		time.Sleep(3 * time.Second)
+		break loop
+	}
+	logger.Info.Print("Stop tulagate")
 }

@@ -41,6 +41,7 @@ func recieverPhases() {
 				logger.Error.Printf("%s %s", socket.RemoteAddr().String(), err.Error())
 				break
 			}
+			// logger.Debug.Printf("receive %v", phases)
 			ch, err := db.GetChanReceivePhases(phases.ID)
 			if err != nil {
 				logger.Error.Printf("%s %s", socket.RemoteAddr().String(), err.Error())

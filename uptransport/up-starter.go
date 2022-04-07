@@ -20,6 +20,8 @@ var SendToAmiChan chan controller.MessageToAmi
 
 func Starter() error {
 	ExtCtrls = make(map[string]controller.ExternalController)
+	SendToAmiChan = make(chan controller.MessageToAmi, 1000)
+	go emptyConnect()
 	/* Подключение к gRPC */
 	grpcURL := fmt.Sprintf("%s:%d", setup.Set.RemoteHost, setup.Set.RemotePort)
 	// grpcConn, err := grpc.Dial(grpcURL, grpc.WithInsecure(), grpc.WithBlock())
@@ -69,7 +71,6 @@ func Starter() error {
 		ExtCtrls[entity.Id] = ctrl
 
 	}
-	SendToAmiChan = make(chan controller.MessageToAmi, 1000)
 	amiClient := proto.NewAMIClient(grpcConn)
 	stream, err := amiClient.Run(ctx)
 	if err != nil {
@@ -80,9 +81,17 @@ func Starter() error {
 	go SendToAmi(stream)
 	return nil
 }
+func emptyConnect() {
+	// logger.Debug.Print("empty")
+	for {
+		message := <-SendToAmiChan
+		logger.Info.Printf("sendtoami %v", proto.RequestRun{ControllerId: message.IDExternal, Action: message.Action, Body: message.Body})
+	}
+}
 func SendToAmi(stream proto.AMI_RunClient) {
 	for {
 		message := <-SendToAmiChan
+		logger.Info.Printf("sendtoami %v", proto.RequestRun{ControllerId: message.IDExternal, Action: message.Action, Body: message.Body})
 		err := stream.Send(&proto.RequestRun{ControllerId: message.IDExternal, Action: message.Action, Body: message.Body})
 		if err != nil {
 			logger.Error.Println(err.Error())
