@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -84,7 +85,7 @@ func GetController(id int) (pudge.Controller, error) {
 	return c, nil
 }
 
-func Starter(dks *controller.DKSet) error {
+func Starter(dks *controller.DKSet, next chan interface{}) {
 	dkset = dks
 	temp_crosses = make(map[pudge.Region]pudge.Cross)
 	temp_ctrls = make(map[int]pudge.Controller)
@@ -109,7 +110,8 @@ func Starter(dks *controller.DKSet) error {
 		}
 		rows, err := db.Query("select id,description,control from public.status;")
 		if err != nil {
-			return err
+			fmt.Println(err.Error())
+			os.Exit(-1)
 		}
 		for rows.Next() {
 			var id int
@@ -120,18 +122,17 @@ func Starter(dks *controller.DKSet) error {
 		}
 		rows.Close()
 		loadCrossAndCtrl()
-		if len(crosses) != 0 {
-			go loaderDb()
-			return nil
+		if len(crosses) == 0 {
+			fmt.Println("нет данных по массиву настройки")
+			os.Exit(-1)
 		}
-		return fmt.Errorf("нет данных по массиву настройки")
-	}
-}
-func loaderDb() {
-	ticker := time.NewTicker(time.Duration(setup.Set.DataBase.Step) * time.Second)
-	for {
-		<-ticker.C
-		loadCrossAndCtrl()
+		next <- 1
+		ticker := time.NewTicker(time.Duration(setup.Set.DataBase.Step) * time.Second)
+		for {
+			<-ticker.C
+			loadCrossAndCtrl()
+		}
+
 	}
 }
 func loadCrossAndCtrl() {
@@ -164,12 +165,13 @@ func loadCrossAndCtrl() {
 			for dev.Next() {
 				var buf []byte
 				var ctrl pudge.Controller
-				rows.Scan(&buf)
-				_ = json.Unmarshal(buf, &ctrl)
-				// if err != nil {
-				// 	logger.Error.Printf("%d %s", cross.IDevice, err.Error())
-				// 	continue
-				// }
+				dev.Scan(&buf)
+				// logger.Debug.Print(string(buf))
+				err = json.Unmarshal(buf, &ctrl)
+				if err != nil {
+					logger.Error.Printf("%d %s", cross.IDevice, err.Error())
+					continue
+				}
 				temp_ctrls[cross.IDevice] = ctrl
 			}
 			dev.Close()

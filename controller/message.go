@@ -57,7 +57,7 @@ type HoldPhase struct {
 //SwitchProgram  Установка программы на контроллере. Инициатор действия сервер. В теле запроса приходит следующая структура:
 type SwitchProgram struct {
 	Programm_number int  `json:"program_number"` // Номер программы
-	Wwitch_default  bool `json:"switch_default"` // Флаг установки значения по умолчанию
+	Switch_default  bool `json:"switch_default"` // Флаг установки значения по умолчанию
 }
 
 //StartCoordination Включение плана координации. Инициатор действия сервер. В теле запроса приходит следующая структура:

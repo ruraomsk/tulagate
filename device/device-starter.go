@@ -1,6 +1,8 @@
 package device
 
 import (
+	"time"
+
 	"github.com/ruraomsk/ag-server/comm"
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
@@ -9,7 +11,7 @@ import (
 	"github.com/ruraomsk/tulagate/setup"
 )
 
-func Starter(dks *controller.DKSet) error {
+func Starter(dks *controller.DKSet, next chan interface{}) {
 	idToRegion = make(map[int]pudge.Region)
 	uidToRegion = make(map[string]pudge.Region)
 	devices = make(map[pudge.Region]Device)
@@ -38,5 +40,8 @@ func Starter(dks *controller.DKSet) error {
 		devices[region] = device
 		go device.worker()
 	}
-	return nil
+	next <- 1
+	for {
+		time.Sleep(time.Second)
+	}
 }

@@ -22,6 +22,7 @@ func senderCommand() {
 		}
 		writer := bufio.NewWriter(socket)
 		tenSecond := time.NewTicker(10 * time.Second)
+		logger.Info.Print("senderCommand ready")
 	loop:
 		for {
 			select {
@@ -39,6 +40,7 @@ func senderCommand() {
 					logger.Error.Printf("%v %s", cmd, err.Error())
 					break loop
 				}
+				logger.Debug.Print(string(buffer))
 				writer.WriteString(string(buffer))
 				writer.WriteString("\n")
 				err = writer.Flush()

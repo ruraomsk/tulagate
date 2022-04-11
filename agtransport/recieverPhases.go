@@ -24,6 +24,8 @@ func recieverPhases() {
 			continue
 		}
 		reader := bufio.NewReader(socket)
+		logger.Info.Print("recieverPhases ready")
+
 		var phases comm.DevPhases
 		for {
 			str, err := reader.ReadString('\n')

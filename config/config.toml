@@ -1,6 +1,6 @@
 	logpath="log/"
 	remoteHost = "89.20.134.2"
-	remotePort = 34221
+	remotePort = 34222
 	myname="tulagate"
 	region=1
 [dataBase]

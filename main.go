@@ -19,6 +19,7 @@ import (
 	"github.com/ruraomsk/tulagate/db"
 	"github.com/ruraomsk/tulagate/device"
 	"github.com/ruraomsk/tulagate/setup"
+	"github.com/ruraomsk/tulagate/tester"
 	"github.com/ruraomsk/tulagate/uptransport"
 )
 
@@ -62,12 +63,18 @@ func init() {
 }
 
 func main() {
+	next := make(chan interface{})
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	logger.Info.Print("Start tulagate")
-	db.Starter(&dkset)
-	device.Starter(&dkset)
-	agtransport.Starter()
-	uptransport.Starter()
+	go db.Starter(&dkset, next)
+	<-next
+	go agtransport.Starter(next)
+	<-next
+	go uptransport.Starter(next)
+	<-next
+	go device.Starter(&dkset, next)
+	<-next
+	go tester.TestCommand()
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 loop:

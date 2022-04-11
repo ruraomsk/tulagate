@@ -22,6 +22,8 @@ func senderArrays() {
 		}
 		writer := bufio.NewWriter(socket)
 		tenSecond := time.NewTicker(10 * time.Second)
+		logger.Info.Print("senderArrays ready")
+
 	loop:
 		for {
 			select {
