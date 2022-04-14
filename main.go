@@ -73,15 +73,16 @@ func main() {
 		}
 	}
 	next := make(chan interface{})
+	stop := make(chan interface{})
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	logger.Info.Print("Start tulagate")
 	go db.Starter(&dkset, next)
 	<-next
 	go agtransport.Starter(next)
 	<-next
-	go uptransport.Starter(next)
-	<-next
-	go device.Starter(&dkset, next)
+	go uptransport.Starter()
+
+	go device.Starter(&dkset, stop, next)
 	<-next
 	go tester.TestCommand()
 	c := make(chan os.Signal, 1)
@@ -90,8 +91,8 @@ loop:
 	for {
 		<-c
 		fmt.Println("\nWait make abort...")
-		tester.ExitCommand()
-		time.Sleep(10 * time.Second)
+		stop <- 1
+		time.Sleep(3 * time.Second)
 		break loop
 	}
 	logger.Info.Print("Stop tulagate")

@@ -92,45 +92,54 @@ var sl = `{
 `
 
 func TestCommand() {
+	for {
+		time.Sleep(5 * time.Second)
 
-	time.Sleep(10 * time.Second)
+		senderCommand("device3", "StartCoordination", pl)
+		senderCommand("device5", "StartCoordination", pl)
+		senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
+		senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
+		time.Sleep(300 * time.Second)
 
-	senderCommand("device3", "StartCoordination", pl)
-	senderCommand("device5", "StartCoordination", pl)
-	senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
-	time.Sleep(300 * time.Second)
-	senderCommand("device5", "StartCoordination", pl1)
-	time.Sleep(300 * time.Second)
+		senderCommand("device3", "HoldPhase", `{"phase_number":1,"max_duration":70,"unhold_phase":true}`)
+		senderCommand("device5", "HoldPhase", `{"phase_number":1,"max_duration":70,"unhold_phase":true}`)
+		time.Sleep(120 * time.Second)
+		senderCommand("device3", "HoldPhase", `{"phase_number":2,"max_duration":75,"unhold_phase":true}`)
+		senderCommand("device5", "HoldPhase", `{"phase_number":2,"max_duration":75,"unhold_phase":true}`)
+		time.Sleep(120 * time.Second)
 
-	senderCommand("device3", "HoldPhase", `{"phase_number":1,"max_duration":70,"unhold_phase":true}`)
-	time.Sleep(120 * time.Second)
-	senderCommand("device3", "HoldPhase", `{"phase_number":2,"max_duration":75,"unhold_phase":true}`)
-	time.Sleep(120 * time.Second)
+		senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
+		senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
+		time.Sleep(60 * time.Second)
+		senderCommand("device3", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
+		senderCommand("device5", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
+		time.Sleep(60 * time.Second)
+		senderCommand("device3", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
+		senderCommand("device5", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
+		time.Sleep(60 * time.Second)
 
-	senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
-	time.Sleep(60 * time.Second)
+		senderCommand("device3", "SetMode", `{"mode":3,"is_enabled":true}`)
+		senderCommand("device5", "SetMode", `{"mode":3,"is_enabled":true}`)
+		time.Sleep(60 * time.Second)
+		senderCommand("device3", "SetMode", `{"mode":4,"is_enabled":true}`)
+		senderCommand("device5", "SetMode", `{"mode":4,"is_enabled":true}`)
+		time.Sleep(60 * time.Second)
+		senderCommand("device3", "SetMode", `{"mode":5,"is_enabled":true}`)
+		senderCommand("device5", "SetMode", `{"mode":5,"is_enabled":true}`)
+		time.Sleep(60 * time.Second)
+		senderCommand("device3", "SetMode", `{"mode":0,"is_enabled":false}`)
+		senderCommand("device5", "SetMode", `{"mode":0,"is_enabled":false}`)
+		time.Sleep(60 * time.Second)
 
-	senderCommand("device3", "SetMode", `{"mode":3,"is_enabled":true}`)
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SetMode", `{"mode":4,"is_enabled":true}`)
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SetMode", `{"mode":5,"is_enabled":true}`)
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SetMode", `{"mode":0,"is_enabled":false}`)
+		senderCommand("device3", "StartCoordination", pl1)
+		senderCommand("device5", "StartCoordination", pl1)
+		time.Sleep(600 * time.Second)
 
-	time.Sleep(600 * time.Second)
+		senderCommand("device3", "StartCoordination", sl)
+		senderCommand("device5", "StartCoordination", sl)
 
-	senderCommand("device3", "StartCoordination", sl)
-	senderCommand("device5", "StartCoordination", sl)
+	}
 
-}
-func ExitCommand() {
-	senderCommand("device3", "StartCoordination", sl)
-	senderCommand("device5", "StartCoordination", sl)
 }
 func senderCommand(id string, action string, body string) error {
 	ch, err := db.GetChanelForMessage(id)
@@ -138,8 +147,6 @@ func senderCommand(id string, action string, body string) error {
 		logger.Error.Print(err.Error())
 	}
 	message := controller.MessageFromAmi{Action: action, Body: body}
-	// logger.Debug.Printf("From server %v", message)
-	// time.Sleep(5 * time.Second)
 	ch <- message
 	return nil
 }

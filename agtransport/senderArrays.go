@@ -12,6 +12,7 @@ import (
 )
 
 func senderArrays() {
+	workSenderArrays = false
 	w := fmt.Sprintf("%s:%d", setup.Set.AgServer.Host, setup.Set.AgServer.PortArray)
 	for {
 		socket, err := net.Dial("tcp", w)
@@ -23,7 +24,7 @@ func senderArrays() {
 		writer := bufio.NewWriter(socket)
 		tenSecond := time.NewTicker(10 * time.Second)
 		logger.Info.Print("senderArrays ready")
-
+		workSenderArrays = true
 	loop:
 		for {
 			select {
@@ -34,7 +35,7 @@ func senderArrays() {
 					logger.Error.Printf("%s %s", socket.RemoteAddr().String(), err.Error())
 					break loop
 				}
-			case cross := <-SendCross:
+			case cross := <-internalSendCross:
 				cross.User = setup.Set.MyName
 				buffer, err := json.Marshal(cross)
 				if err != nil {
@@ -51,6 +52,7 @@ func senderArrays() {
 				}
 			}
 		}
+		workSenderArrays = false
 		socket.Close()
 	}
 

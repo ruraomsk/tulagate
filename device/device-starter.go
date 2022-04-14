@@ -11,7 +11,7 @@ import (
 	"github.com/ruraomsk/tulagate/setup"
 )
 
-func Starter(dks *controller.DKSet, next chan interface{}) {
+func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}) {
 	idToRegion = make(map[int]pudge.Region)
 	uidToRegion = make(map[string]pudge.Region)
 	devices = make(map[pudge.Region]Device)
@@ -42,6 +42,9 @@ func Starter(dks *controller.DKSet, next chan interface{}) {
 	}
 	next <- 1
 	for {
-		time.Sleep(time.Second)
+		<-stop
+		for _, dev := range devices {
+			dev.stop()
+		}
 	}
 }

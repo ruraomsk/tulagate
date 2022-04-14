@@ -21,6 +21,9 @@ var err error
 func (d *Device) worker() {
 	//При запуске сразу шлем СФДК
 	logger.Debug.Printf("device %v", d.Region)
+	for !agtransport.ReadyAgTransport() {
+		time.Sleep(time.Second)
+	}
 	tickSFDK := time.NewTicker(time.Minute)
 	tickOneSecond := time.NewTicker(time.Second)
 	d.executeStartWork()
@@ -28,6 +31,10 @@ func (d *Device) worker() {
 	for {
 		select {
 		case <-tickOneSecond.C:
+			if !agtransport.ReadyAgTransport() {
+				d.sendNotTransport()
+				continue
+			}
 			if d.HoldPhase.Unhold_phase {
 				if d.DK.FDK == d.HoldPhase.Phase_number {
 					d.CountHoldPhase++
@@ -48,18 +55,30 @@ func (d *Device) worker() {
 				uptransport.SendToAmiChan <- d.sendStatus()
 			}
 		case <-tickSFDK.C:
+			if !agtransport.ReadyAgTransport() {
+				d.sendNotTransport()
+				continue
+			}
 			//Шлем устройству СФДК
 			// logger.Debug.Printf("dev %v 1 minute", d.Region)
 			if d.Ctrl.IsConnected() && !d.Ctrl.StatusCommandDU.IsReqSFDK1 {
 				agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, User: setup.Set.MyName, Command: 4, Params: 1}
 			}
 		case dk := <-d.DevPhases:
+			if !agtransport.ReadyAgTransport() {
+				d.sendNotTransport()
+				continue
+			}
 			//Пришло измение по фазам
 			d.DK = dk.DK
 			d.loadData()
 			uptransport.SendToAmiChan <- d.sendStatus()
 		case message := <-d.MessageForMe:
-			logger.Debug.Print(message)
+			if !agtransport.ReadyAgTransport() {
+				d.sendNotTransport()
+				continue
+			}
+
 			switch message.Action {
 			case "SetMode":
 				d.sendReplayToAmi(d.executeSetMode(message))
@@ -89,6 +108,17 @@ func (d *Device) loadData() {
 		logger.Error.Print(err.Error())
 		return
 	}
+}
+func (d *Device) sendNotTransport() {
+	message := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "status", Body: "{}"}
+	status := controller.Status{State: 0}
+	status.Timestamp = time.Now().Unix()
+	status.Errors = controller.Errors{Hw_error: make([]string, 0), Sw_error: make([]string, 0), Ec_error: make([]string, 0), Detector_fault: make([]string, 0)}
+	status.Errors.Sw_error = append(status.Errors.Sw_error, "Нет связи с системой управления ag-server!!!")
+	body, _ := json.Marshal(&status)
+	message.Body = string(body)
+	d.LastSendStatus = time.Now()
+	uptransport.SendToAmiChan <- message
 }
 func (d *Device) sendStatus() controller.MessageToAmi {
 	message := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "status", Body: "{}"}

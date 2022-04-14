@@ -12,6 +12,7 @@ import (
 )
 
 func senderCommand() {
+	workSenderCommand = false
 	w := fmt.Sprintf("%s:%d", setup.Set.AgServer.Host, setup.Set.AgServer.PortCommand)
 	for {
 		socket, err := net.Dial("tcp", w)
@@ -22,6 +23,8 @@ func senderCommand() {
 		}
 		writer := bufio.NewWriter(socket)
 		tenSecond := time.NewTicker(10 * time.Second)
+		workSenderCommand = true
+
 		logger.Info.Print("senderCommand ready")
 	loop:
 		for {
@@ -33,7 +36,7 @@ func senderCommand() {
 					logger.Error.Printf("%s %s", socket.RemoteAddr().String(), err.Error())
 					break loop
 				}
-			case cmd := <-CommandARM:
+			case cmd := <-internalCommandARM:
 				cmd.User = setup.Set.MyName
 				buffer, err := json.Marshal(cmd)
 				if err != nil {
@@ -50,6 +53,7 @@ func senderCommand() {
 				}
 			}
 		}
+		workSenderCommand = false
 		socket.Close()
 	}
 }
