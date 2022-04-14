@@ -3,22 +3,31 @@ package device
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
+	"time"
 
+	"github.com/ruraomsk/ag-server/binding"
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/tulagate/agtransport"
 	"github.com/ruraomsk/tulagate/controller"
+	"github.com/ruraomsk/tulagate/uptransport"
 )
 
+func (d *Device) executeStartWork() {
+	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 9}
+	time.Sleep(time.Second)
+	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: 0}
+	time.Sleep(time.Second)
+	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 4, Params: 1}
+
+}
 func (d *Device) sendReplayToAmi(message string) {
-	repl := controller.ErrorString{Message: message}
-	buffer, err := json.Marshal(&repl)
-	if err != nil {
-		logger.Error.Print(err.Error())
-		return
-	}
-	logger.Debug.Print(controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "error", Body: string(buffer)})
-	// uptransport.SendToAmiChan <- controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "error", Body: string(buffer)}
+	d.ErrorTech = make([]string, 0)
+	d.ErrorTech = append(d.ErrorTech, message)
+	uptransport.SendToAmiChan <- d.sendStatus()
+	d.ErrorTech = make([]string, 0)
+
 }
 func (d *Device) executeSetMode(message controller.MessageFromAmi) string {
 	var setter controller.SetMode
@@ -38,7 +47,7 @@ func (d *Device) executeSetMode(message controller.MessageFromAmi) string {
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 0x0b}
 		return "ok"
 	}
-	return "unsupported"
+	return fmt.Sprintf("unsupported %d set mode", setter.Mode)
 }
 func (d *Device) executeHoldPhase(message controller.MessageFromAmi) string {
 	var setter controller.HoldPhase
@@ -53,20 +62,6 @@ func (d *Device) executeHoldPhase(message controller.MessageFromAmi) string {
 		d.CountHoldPhase = 0
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 9}
 		return "ok"
-	}
-	phs := make([]int, 0)
-	for i := 1; i < 13; i++ {
-		phs = append(phs, d.Cross.Arrays.SetDK.GetPhases(i)...)
-	}
-	found := false
-	for _, v := range phs {
-		if v == setter.Phase_number {
-			found = true
-			break
-		}
-	}
-	if !found {
-		return fmt.Sprintf("unsupported phase %d", setter.Phase_number)
 	}
 	d.HoldPhase.Max_duration = setter.Max_duration
 	d.HoldPhase.Phase_number = setter.Phase_number
@@ -89,5 +84,78 @@ func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string 
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: setter.Programm_number}
 		return "ok"
 	}
-	return "unsupported"
+	return fmt.Sprintf("unsupported %d programm", setter.Programm_number)
+}
+
+func (d *Device) executeStartCoordination(message controller.MessageFromAmi) string {
+	var setter controller.StartCoordination
+	err := json.Unmarshal([]byte(message.Body), &setter)
+	if err != nil {
+		return err.Error()
+	}
+	logger.Debug.Println(setter)
+	if setter.Programm_number < 1 || setter.Programm_number > 12 {
+		return fmt.Sprintf("unsupported %d programm", setter.Programm_number)
+	}
+	if len(setter.Phases) > 12 {
+		return fmt.Sprintf("слишком много фаз в %d  не больше 12", setter.Programm_number)
+	}
+	if !setter.IsEnabled {
+		//Удаляем план создаем в нем ЛР
+		for i, v := range d.Cross.Arrays.SetDK.DK {
+			if v.Pk == setter.Programm_number {
+				if v.Pk == setter.Programm_number {
+					d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
+					d.Cross.Arrays.SetDK.DK[i].Tc = 0 //Локальный режим
+					agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+					return "ok"
+				}
+			}
+		}
+		return fmt.Sprintf("%d нет такого плана в системе", setter.Programm_number)
+	}
+	if len(setter.Phases) < 1 {
+		return fmt.Sprintf("слишком мало фаз в %d ", setter.Programm_number)
+	}
+	//считаем время цикла
+	tcycle := 0
+	for _, v := range setter.Phases {
+		tcycle += v.Phase_duration
+	}
+	if setter.Offset >= tcycle {
+		return fmt.Sprintf("смещение цикла не должно быть больше или равно времени цикла в %d программе", setter.Programm_number)
+	}
+	sort.Slice(setter.Phases, func(i, j int) bool {
+		return setter.Phases[i].Phase_order < setter.Phases[j].Phase_order
+	})
+	if setter.Phases[0].Phase_number != 1 {
+		return fmt.Sprintf("первая фаза в цикле всегда должна быть первая в %d программе", setter.Programm_number)
+	}
+	for i, v := range d.Cross.Arrays.SetDK.DK {
+		if v.Pk == setter.Programm_number {
+			d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
+			d.Cross.Arrays.SetDK.DK[i].Tc = tcycle
+			d.Cross.Arrays.SetDK.DK[i].Shift = setter.Offset
+			d.Cross.Arrays.SetDK.DK[i].TypePU = 0
+			tnow := setter.Offset
+			for j, v := range setter.Phases {
+				d.Cross.Arrays.SetDK.DK[i].Stages[j].Start = tnow
+				d.Cross.Arrays.SetDK.DK[i].Stages[j].Number = v.Phase_number
+				d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 0
+				if tnow+v.Phase_duration >= tcycle {
+					d.Cross.Arrays.SetDK.DK[i].Stages[j].Trs = true
+					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tcycle
+					tnow = tnow + v.Phase_duration - tcycle
+					d.Cross.Arrays.SetDK.DK[i].Stages[j].Dt = tnow
+				} else {
+					tnow += v.Phase_duration
+					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tnow
+				}
+			}
+			logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
+			agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+			return "ok"
+		}
+	}
+	return fmt.Sprintf("%d нет такого плана в системе", setter.Programm_number)
 }

@@ -1,6 +1,8 @@
 package device
 
 import (
+	"time"
+
 	"github.com/ruraomsk/ag-server/comm"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/tulagate/controller"
@@ -22,5 +24,7 @@ type Device struct {
 	HoldPhase      controller.HoldPhase
 	CountHoldPhase int
 	State          int //State  в их понимании
-	ErrorDB        []string
+	ErrorTech      []string
+	LastSendStatus time.Time
+	DK             pudge.DK
 }

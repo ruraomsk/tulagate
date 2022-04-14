@@ -22,16 +22,14 @@ func (d *Device) worker() {
 	//При запуске сразу шлем СФДК
 	logger.Debug.Printf("device %v", d.Region)
 	tickSFDK := time.NewTicker(time.Minute)
-	// if d.Ctrl.IsConnected() && !d.Ctrl.StatusCommandDU.IsReqSFDK1 {
 	tickOneSecond := time.NewTicker(time.Second)
-	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, User: setup.Set.MyName, Command: 4, Params: 1}
+	d.executeStartWork()
 	// }
 	for {
 		select {
 		case <-tickOneSecond.C:
-			d.loadData()
 			if d.HoldPhase.Unhold_phase {
-				if d.Ctrl.DK.FTSDK == d.HoldPhase.Phase_number {
+				if d.DK.FDK == d.HoldPhase.Phase_number {
 					d.CountHoldPhase++
 					if d.CountHoldPhase >= d.HoldPhase.Max_duration {
 						d.HoldPhase.Max_duration = 0
@@ -40,21 +38,25 @@ func (d *Device) worker() {
 						d.CountHoldPhase = 0
 						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 9}
 					} else {
-						if d.CountHoldPhase%50 == 0 {
+						if d.CountHoldPhase%30 == 0 {
 							agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: d.HoldPhase.Phase_number}
 						}
 					}
 				}
 			}
-
+			if time.Since(d.LastSendStatus) > time.Minute {
+				uptransport.SendToAmiChan <- d.sendStatus()
+			}
 		case <-tickSFDK.C:
 			//Шлем устройству СФДК
 			// logger.Debug.Printf("dev %v 1 minute", d.Region)
-			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, User: setup.Set.MyName, Command: 4, Params: 1}
+			if d.Ctrl.IsConnected() && !d.Ctrl.StatusCommandDU.IsReqSFDK1 {
+				agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, User: setup.Set.MyName, Command: 4, Params: 1}
+			}
 		case dk := <-d.DevPhases:
 			//Пришло измение по фазам
+			d.DK = dk.DK
 			d.loadData()
-			d.Ctrl.DK = dk.DK
 			uptransport.SendToAmiChan <- d.sendStatus()
 		case message := <-d.MessageForMe:
 			logger.Debug.Print(message)
@@ -65,6 +67,8 @@ func (d *Device) worker() {
 				d.sendReplayToAmi(d.executeHoldPhase(message))
 			case "SwitchProgram":
 				d.sendReplayToAmi(d.executeSwitchProgram(message))
+			case "StartCoordination":
+				d.sendReplayToAmi(d.executeStartCoordination(message))
 			default:
 				logger.Error.Printf("not found %v", message)
 				d.sendReplayToAmi(fmt.Sprintf("%s not supported", message.Action))
@@ -75,29 +79,27 @@ func (d *Device) worker() {
 }
 func (d *Device) loadData() {
 	// logger.Debug.Printf("%d loadData", d.Cross.IDevice)
-	d.ErrorDB = make([]string, 0)
 	d.Cross, err = db.GetCross(d.Region)
 	if err != nil {
 		logger.Error.Print(err.Error())
-		d.ErrorDB = append(d.ErrorDB, err.Error())
 		return
 	}
 	d.Ctrl, err = db.GetController(d.Cross.IDevice)
 	if err != nil {
 		logger.Error.Print(err.Error())
-		d.ErrorDB = append(d.ErrorDB, err.Error())
 		return
 	}
 }
 func (d *Device) sendStatus() controller.MessageToAmi {
 	message := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "status", Body: "{}"}
-	status := controller.Status{Program_number: d.Cross.PK, Phase_number: d.Ctrl.DK.FTUDK}
-	if d.Ctrl.DK.FTSDK == 9 {
+	status := controller.Status{Program_number: d.Cross.PK, Phase_number: d.DK.FDK}
+	if d.DK.FDK == 9 {
 		status.Tact_number = 1
+		status.Phase_number = d.DK.FTUDK
 	} else {
 		status.Tact_number = 2
 	}
-	status.Tact_tick = d.Ctrl.DK.TDK
+	status.Tact_tick = d.DK.TDK
 	if d.HoldPhase.Unhold_phase {
 		status.Hold_phase_number = d.HoldPhase.Phase_number
 		status.Hold_phase_time_remain = d.HoldPhase.Max_duration - d.CountHoldPhase
@@ -150,12 +152,12 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 	if d.Ctrl.GPS.Seek {
 		status.Errors.Hw_error = append(status.Errors.Hw_error, "Поиск спутников GPS")
 	}
-
+	status.Errors.Sw_error = d.ErrorTech
 	status.Errors.Is_door_opened = d.Ctrl.DK.ODK
 	status.Channels_state = make([]controller.Channels_state, 0)
 	status.Channels_powers = make([]float64, 0)
 	status.Mode = 0
-	switch d.Ctrl.DK.RDK {
+	switch d.DK.RDK {
 	case 1:
 		status.Mode = 6
 	case 2:
@@ -172,25 +174,31 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 		status.Mode = 2
 	case 9:
 		status.Mode = 2
+	case 0:
+		status.Mode = 2
 	default:
-		logger.Error.Printf("rdk=%d нужна перекодировка!", d.Ctrl.DK.RDK)
+		logger.Error.Printf("rdk=%d нужна перекодировка!", d.DK.RDK)
 	}
-	switch d.Ctrl.DK.FDK {
+	switch d.DK.FDK {
 	case 10:
 		status.Mode = 3
+	case 14:
+		status.Mode = 3
 	case 11:
+		status.Mode = 5
+	case 15:
 		status.Mode = 5
 	case 12:
 		status.Mode = 4
 	default:
-		if d.Ctrl.DK.FDK > 9 {
-			logger.Error.Printf("fdk=%d нужна перекодировка!", d.Ctrl.DK.FDK)
+		if d.DK.FDK > 9 {
+			logger.Error.Printf("fdk=%d нужна перекодировка!", d.DK.FDK)
 		}
 	}
 	status.Timestamp = time.Now().Unix()
 	body, _ := json.Marshal(&status)
 	message.Body = string(body)
-	// logger.Debug.Printf("message %v", message)
+	d.LastSendStatus = time.Now()
 	return message
 
 }

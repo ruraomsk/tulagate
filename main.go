@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/ruraomsk/tulagate/agtransport"
 	"github.com/ruraomsk/tulagate/controller"
+	"github.com/ruraomsk/tulagate/creator"
 	"github.com/ruraomsk/tulagate/db"
 	"github.com/ruraomsk/tulagate/device"
 	"github.com/ruraomsk/tulagate/setup"
@@ -63,6 +65,13 @@ func init() {
 }
 
 func main() {
+	if len(os.Args) > 1 {
+		if strings.Contains(os.Args[1], "create") {
+			creator.Creator(&dkset)
+			fmt.Println("Инициализация окончена...")
+			return
+		}
+	}
 	next := make(chan interface{})
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	logger.Info.Print("Start tulagate")
@@ -81,7 +90,8 @@ loop:
 	for {
 		<-c
 		fmt.Println("\nWait make abort...")
-		time.Sleep(3 * time.Second)
+		tester.ExitCommand()
+		time.Sleep(10 * time.Second)
 		break loop
 	}
 	logger.Info.Print("Stop tulagate")

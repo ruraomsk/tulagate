@@ -11,8 +11,10 @@ import (
 	"github.com/ruraomsk/tulagate/proto"
 	"github.com/ruraomsk/tulagate/setup"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 var ExtCtrls map[string]controller.ExternalController
@@ -114,7 +116,20 @@ func SendToAmi(stream proto.AMI_RunClient) {
 	for {
 		message := <-SendToAmiChan
 		// logger.Debug.Print(message.Body)
-		logger.Info.Printf("sendtoami %v", proto.RequestRun{ControllerId: message.IDExternal, Action: message.Action, Body: message.Body})
+		if message.Action == "replay" {
+			var statusCode = codes.OK
+			// if message.Body == "ok" {
+			// } else {
+			// 	statusCode = codes.NotFound
+			// }
+			err := status.Error(statusCode, message.Body)
+			if err != nil {
+				logger.Error.Println(err.Error())
+				return
+			}
+			continue
+		}
+		// logger.Info.Printf("sendtoami %v", proto.RequestRun{ControllerId: message.IDExternal, Action: message.Action, Body: message.Body})
 		err := stream.Send(&proto.RequestRun{ControllerId: message.IDExternal, Action: message.Action, Body: message.Body, Protocol: "DKST"})
 		if err != nil {
 			logger.Error.Println(err.Error())

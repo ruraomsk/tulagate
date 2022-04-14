@@ -23,37 +23,114 @@ import (
 // 	Programm_number int  `json:"program_number"` // Номер программы
 // 	Switch_default  bool `json:"switch_default"` // Флаг установки значения по умолчанию
 // }
+//StartCoordination Включение плана координации. Инициатор действия сервер. В теле запроса приходит следующая структура:
+// type StartCoordination struct {
+// 	Programm_number int     `json:"program_number"` // Номер программы
+// 	Phases          []Phase `json:"phases"`         // Список фаз
+// 	Offset          int     `json:"offset"`         // Смещение начала программы в сек
+// 	IsEnabled       bool    `json:"isEnabled"`      // Вкл / Выкл
+// }
+
+// type Phase struct {
+// 	Phase_number   int `json:"phase_number"`   //Номер фазы
+// 	Phase_duration int `json:"phase_duration"` //Время фазы в секундах
+// 	Phase_order    int `json:"phase_order"`    //Порядок фазы в программе
+// 	Max_time       int `json:"max_time"`       //Максимальная граница
+// 	Min_time       int `json:"min_time"`       //Минимальная граница
+// }
+var pl = `{
+	"program_number":1,
+	"offset":10,
+	"isEnabled":true,
+	"phases":[
+		{
+			"phase_number":1,
+			"phase_duration":24,
+			"phase_order":1
+		},
+		{
+			"phase_number":2,
+			"phase_duration":24,
+			"phase_order":2
+		},
+		{
+			"phase_number":1,
+			"phase_duration":15,
+			"phase_order":3
+		},
+		{
+			"phase_number":2,
+			"phase_duration":15,
+			"phase_order":4
+		}
+	]
+}`
+var pl1 = `{
+	"program_number":1,
+	"offset":20,
+	"isEnabled":true,
+	"phases":[
+		{
+			"phase_number":1,
+			"phase_duration":25,
+			"phase_order":1
+		},
+		{
+			"phase_number":2,
+			"phase_duration":25,
+			"phase_order":2
+		}
+	]
+}`
+
+var sl = `{
+	"program_number":1,
+	"offset":0,
+	"isEnabled":false,
+	"phases":[]
+}
+`
 
 func TestCommand() {
 
-	time.Sleep(20 * time.Second)
-	senderCommand("device3", "SwitchProgram", "{\"program_number\":1,\"switch_default\":true}")
+	time.Sleep(10 * time.Second)
+
+	senderCommand("device3", "StartCoordination", pl)
+	senderCommand("device5", "StartCoordination", pl)
+	senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
+	time.Sleep(300 * time.Second)
+	senderCommand("device5", "StartCoordination", pl1)
+	time.Sleep(300 * time.Second)
+
+	senderCommand("device3", "HoldPhase", `{"phase_number":1,"max_duration":70,"unhold_phase":true}`)
+	time.Sleep(120 * time.Second)
+	senderCommand("device3", "HoldPhase", `{"phase_number":2,"max_duration":75,"unhold_phase":true}`)
+	time.Sleep(120 * time.Second)
+
+	senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
 	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SwitchProgram", "{\"program_number\":2,\"switch_default\":true}")
+	senderCommand("device3", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
 	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SwitchProgram", "{\"program_number\":0,\"switch_default\":false}")
+	senderCommand("device3", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
 	time.Sleep(60 * time.Second)
 
-	senderCommand("device3", "HoldPhase", "{\"phase_number\":1,\"max_duration\":45,\"unhold_phase\":true}")
+	senderCommand("device3", "SetMode", `{"mode":3,"is_enabled":true}`)
 	time.Sleep(60 * time.Second)
-	senderCommand("device3", "HoldPhase", "{\"phase_number\":2,\"max_duration\":45,\"unhold_phase\":true}")
+	senderCommand("device3", "SetMode", `{"mode":4,"is_enabled":true}`)
 	time.Sleep(60 * time.Second)
-	senderCommand("device3", "HoldPhase", "{\"phase_number\":3,\"max_duration\":45,\"unhold_phase\":true}")
+	senderCommand("device3", "SetMode", `{"mode":5,"is_enabled":true}`)
 	time.Sleep(60 * time.Second)
-	senderCommand("device3", "HoldPhase", "{\"phase_number\":4,\"max_duration\":45,\"unhold_phase\":true}")
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "HoldPhase", "{\"phase_number\":4,\"max_duration\":45,\"unhold_phase\":false}")
-	time.Sleep(60 * time.Second)
+	senderCommand("device3", "SetMode", `{"mode":0,"is_enabled":false}`)
 
-	senderCommand("device3", "SetMode", "{\"mode\":3,\"is_enabled\":true}")
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SetMode", "{\"mode\":4,\"is_enabled\":true}")
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SetMode", "{\"mode\":5,\"is_enabled\":true}")
-	time.Sleep(60 * time.Second)
-	senderCommand("device3", "SetMode", "{\"mode\":0,\"is_enabled\":false}")
-	time.Sleep(60 * time.Second)
+	time.Sleep(600 * time.Second)
 
+	senderCommand("device3", "StartCoordination", sl)
+	senderCommand("device5", "StartCoordination", sl)
+
+}
+func ExitCommand() {
+	senderCommand("device3", "StartCoordination", sl)
+	senderCommand("device5", "StartCoordination", sl)
 }
 func senderCommand(id string, action string, body string) error {
 	ch, err := db.GetChanelForMessage(id)
@@ -61,7 +138,7 @@ func senderCommand(id string, action string, body string) error {
 		logger.Error.Print(err.Error())
 	}
 	message := controller.MessageFromAmi{Action: action, Body: body}
-	logger.Debug.Printf("From server %v", message)
+	// logger.Debug.Printf("From server %v", message)
 	// time.Sleep(5 * time.Second)
 	ch <- message
 	return nil
