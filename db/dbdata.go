@@ -30,6 +30,7 @@ var (
 	dkset        *controller.DKSet
 	phaseschans  map[int]chan comm.DevPhases
 	messagechans map[string]chan controller.MessageFromAmi
+	mapStops     map[pudge.Region]chan interface{}
 )
 
 type vstatus struct {
@@ -74,7 +75,14 @@ func GetCross(region pudge.Region) (pudge.Cross, error) {
 	}
 	return c, nil
 }
-
+func AddChanToStop(region pudge.Region, ch chan interface{}) {
+	mapStops[region] = ch
+}
+func AllStops() {
+	for _, v := range mapStops {
+		v <- 1
+	}
+}
 func GetController(id int) (pudge.Controller, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -92,6 +100,8 @@ func Starter(dks *controller.DKSet, next chan interface{}) {
 	status = make(map[int]vstatus)
 	phaseschans = make(map[int]chan comm.DevPhases)
 	messagechans = make(map[string]chan controller.MessageFromAmi)
+	mapStops = make(map[pudge.Region]chan interface{})
+
 	dbinfo := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
 		setup.Set.DataBase.Host, setup.Set.DataBase.User,
 		setup.Set.DataBase.Password, setup.Set.DataBase.DBname)

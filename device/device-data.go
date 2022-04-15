@@ -22,6 +22,7 @@ type Device struct {
 	DevPhases      chan comm.DevPhases
 	MessageForMe   chan controller.MessageFromAmi
 	HoldPhase      controller.HoldPhase
+	clear          chan interface{}
 	CountHoldPhase int
 	State          int //State  в их понимании
 	ErrorTech      []string

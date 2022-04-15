@@ -19,7 +19,8 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 	for _, v := range dks.DKSets {
 		region := pudge.Region{Region: setup.Set.Region, Area: v.Area, ID: v.ID}
 		device := Device{OneSet: v, Region: region, DevPhases: make(chan comm.DevPhases),
-			MessageForMe: make(chan controller.MessageFromAmi, 10), ErrorTech: make([]string, 0), LastSendStatus: time.Now()}
+			MessageForMe: make(chan controller.MessageFromAmi, 10), ErrorTech: make([]string, 0), LastSendStatus: time.Now(),
+			clear: make(chan interface{})}
 		cross, err := db.GetCross(region)
 		if err != nil {
 			logger.Error.Print(err.Error())
@@ -37,6 +38,7 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 		uidToRegion[v.IDExternal] = region
 		db.AddChanReceivePhases(device.Cross.IDevice, device.DevPhases)
 		db.AddChanelForMessage(device.OneSet.IDExternal, device.MessageForMe)
+		db.AddChanToStop(region, device.clear)
 		devices[region] = device
 		go device.worker()
 	}
@@ -46,5 +48,11 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 		for _, dev := range devices {
 			dev.stop()
 		}
+	}
+}
+
+func ClearAllPKs() {
+	for _, v := range devices {
+		v.clear <- 1
 	}
 }

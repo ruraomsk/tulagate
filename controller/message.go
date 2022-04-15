@@ -72,6 +72,7 @@ type Phase struct {
 	Phase_number   int `json:"phase_number"`   //Номер фазы
 	Phase_duration int `json:"phase_duration"` //Время фазы в секундах
 	Phase_order    int `json:"phase_order"`    //Порядок фазы в программе
+	Type           int `json:"type"`           //Тип фазы 0 - обычная 1 МГР
 	Max_time       int `json:"max_time"`       //Максимальная граница
 	Min_time       int `json:"min_time"`       //Минимальная граница
 }
