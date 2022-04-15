@@ -28,4 +28,5 @@ type Device struct {
 	ErrorTech      []string
 	LastSendStatus time.Time
 	DK             pudge.DK
+	MGRS           map[int]controller.MGR
 }

@@ -20,7 +20,7 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 		region := pudge.Region{Region: setup.Set.Region, Area: v.Area, ID: v.ID}
 		device := Device{OneSet: v, Region: region, DevPhases: make(chan comm.DevPhases),
 			MessageForMe: make(chan controller.MessageFromAmi, 10), ErrorTech: make([]string, 0), LastSendStatus: time.Now(),
-			clear: make(chan interface{})}
+			clear: make(chan interface{}), MGRS: make(map[int]controller.MGR)}
 		cross, err := db.GetCross(region)
 		if err != nil {
 			logger.Error.Print(err.Error())
@@ -33,6 +33,9 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 			device.Cross.StatusDevice = 18
 		} else {
 			device.Ctrl = ctrl
+		}
+		for _, m := range v.MGRs {
+			device.MGRS[m.Phase] = m
 		}
 		idToRegion[device.Cross.IDevice] = region
 		uidToRegion[v.IDExternal] = region

@@ -45,22 +45,22 @@ var pl = `{
 	"phases":[
 		{
 			"phase_number":1,
-			"phase_duration":24,
+			"phase_duration":20,
 			"phase_order":1
 		},
 		{
 			"phase_number":2,
-			"phase_duration":24,
+			"phase_duration":20,
 			"phase_order":2
 		},
 		{
 			"phase_number":1,
-			"phase_duration":15,
+			"phase_duration":30,
 			"phase_order":3
 		},
 		{
 			"phase_number":2,
-			"phase_duration":15,
+			"phase_duration":30,
 			"phase_order":4
 		}
 	]

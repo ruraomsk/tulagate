@@ -143,12 +143,17 @@ func (d *Device) executeStartCoordination(message controller.MessageFromAmi) str
 			tnow := setter.Offset
 			for j, v := range setter.Phases {
 				d.Cross.Arrays.SetDK.DK[i].Stages[j].Start = tnow
+				if v.Phase_number == 0 {
+					d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 1
+				} else {
+					d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 0
+				}
 				d.Cross.Arrays.SetDK.DK[i].Stages[j].Number = v.Phase_number
-				d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 0
 				if tnow+v.Phase_duration >= tcycle {
+					logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i].Stages[j])
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Trs = true
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tcycle
-					tnow = tnow + v.Phase_duration - tcycle
+					tnow += v.Phase_duration - tcycle
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Dt = tnow
 				} else {
 					tnow += v.Phase_duration

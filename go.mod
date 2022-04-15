@@ -4,8 +4,8 @@ go 1.17
 
 require (
 	github.com/BurntSushi/toml v1.1.0
-	github.com/lib/pq v1.10.4
-	github.com/ruraomsk/ag-server v0.0.0-20220405064445-a769421f3528
+	github.com/lib/pq v1.10.5
+	github.com/ruraomsk/ag-server v0.0.0-20220414061309-b7e53662c258
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.28.0
 )

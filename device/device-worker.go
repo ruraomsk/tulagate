@@ -94,6 +94,8 @@ func (d *Device) worker() {
 			case "SwitchProgram":
 				d.sendReplayToAmi(d.executeSwitchProgram(message))
 			case "StartCoordination":
+				message = d.insertMGR(message)
+				logger.Debug.Print(message)
 				d.sendReplayToAmi(d.executeStartCoordination(message))
 			default:
 				logger.Error.Printf("not found %v", message)
