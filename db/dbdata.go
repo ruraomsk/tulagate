@@ -20,7 +20,9 @@ import (
 
 var (
 	db           *sql.DB = nil
+	dbBase       *sql.DB = nil
 	mutex        sync.Mutex
+	baseMutex    sync.Mutex
 	temp_crosses map[pudge.Region]pudge.Cross
 	temp_ctrls   map[int]pudge.Controller
 	crosses      map[pudge.Region]pudge.Cross
@@ -136,6 +138,13 @@ func Starter(dks *controller.DKSet, next chan interface{}) {
 			fmt.Println("нет данных по массиву настройки")
 			os.Exit(-1)
 		}
+		dbBase, err = sql.Open("postgres", dbinfo)
+		if err != nil {
+			logger.Error.Print(err.Error())
+			time.Sleep(10 * time.Second)
+			continue
+		}
+		touchBase()
 		next <- 1
 		ticker := time.NewTicker(time.Duration(setup.Set.DataBase.Step) * time.Second)
 		for {

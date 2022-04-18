@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ruraomsk/ag-server/binding"
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/tulagate/agtransport"
@@ -25,6 +24,11 @@ func (d *Device) worker() {
 	for !agtransport.ReadyAgTransport() {
 		time.Sleep(time.Second)
 	}
+	d.loadData()
+	baseCross, _ := db.GetStartCross(d.Region)
+	db.MoveData(&d.Cross, &baseCross)
+	agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+	logger.Info.Printf("Откатились %v", d.Cross.IDevice)
 	tickSFDK := time.NewTicker(time.Minute)
 	tickOneSecond := time.NewTicker(time.Second)
 	d.executeStartWork()
@@ -34,15 +38,17 @@ func (d *Device) worker() {
 		case <-d.clear:
 			//Пришла команда почистить свое состояние
 			d.loadData()
-			clearPKs(&d.Cross)
+			baseCross, _ := db.GetStartCross(d.Region)
+			db.MoveData(&d.Cross, &baseCross)
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}
-			logger.Info.Printf("Почистились %v", d.Cross.IDevice)
+			logger.Info.Printf("Откатились %v", d.Cross.IDevice)
 		case <-tickOneSecond.C:
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()
 				continue
 			}
 			if d.HoldPhase.Unhold_phase {
+				//Есть команда на удержание фазы
 				if d.DK.FDK == d.HoldPhase.Phase_number {
 					d.CountHoldPhase++
 					if d.CountHoldPhase >= d.HoldPhase.Max_duration {
@@ -239,28 +245,4 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 	message.Body = string(body)
 	d.LastSendStatus = time.Now()
 	return message
-
-}
-func clearPKs(cross *pudge.Cross) {
-	cross.Arrays.MonthSets = *binding.NewYearSets()
-	for i := 0; i < len(cross.Arrays.MonthSets.MonthSets); i++ {
-		for j := 0; j < len(cross.Arrays.MonthSets.MonthSets[i].Days); j++ {
-			cross.Arrays.MonthSets.MonthSets[i].Days[j] = 1
-		}
-	}
-	cross.Arrays.WeekSets = *binding.NewWeekSets()
-	for i := 0; i < len(cross.Arrays.WeekSets.WeekSets); i++ {
-		for j := 0; j < len(cross.Arrays.WeekSets.WeekSets[i].Days); j++ {
-			cross.Arrays.WeekSets.WeekSets[i].Days[j] = 1
-		}
-	}
-	cross.Arrays.DaySets = *binding.NewDaySet()
-	cross.Arrays.DaySets.DaySets[0].Count = 1
-	cross.Arrays.DaySets.DaySets[0].Number = 1
-	cross.Arrays.DaySets.DaySets[0].Lines[0].Hour = 24
-	cross.Arrays.DaySets.DaySets[0].Lines[0].Min = 0
-	cross.Arrays.DaySets.DaySets[0].Lines[0].PKNom = 1
-
-	cross.Arrays.SetDK = *binding.NewSetDK()
-
 }

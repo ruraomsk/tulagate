@@ -26,7 +26,7 @@ func (d *Device) insertMGR(message controller.MessageFromAmi) controller.Message
 		if !is {
 			continue
 		}
-		if setter.Phases[i].Phase_duration > (m.Tlen + m.TMGR) {
+		if setter.Phases[i].Phase_duration > (m.TLen + m.TMGR) {
 			//Можно вставить МГР
 			nph := controller.Phase{Phase_number: 0, Phase_order: setter.Phases[i].Phase_order + 1, Phase_duration: m.TMGR}
 			setter.Phases[i].Phase_duration = setter.Phases[i].Phase_duration - m.TMGR

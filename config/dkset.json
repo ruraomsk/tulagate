@@ -3,36 +3,12 @@
         {
             "idext": "device3",
             "area": 1,
-            "id": 7,
-            "mgrs": [
-                {
-                    "phase": 1,
-                    "tlen": 16,
-                    "tmgr": 5
-                },
-                {
-                    "phase": 2,
-                    "tlen": 16,
-                    "tmgr": 6
-                }
-            ]
+            "id": 7
         },
         {
             "idext": "device5",
             "area": 1,
-            "id": 11,
-            "mgrs": [
-                {
-                    "phase": 1,
-                    "tlen": 17,
-                    "tmgr": 5
-                },
-                {
-                    "phase": 2,
-                    "tlen": 17,
-                    "tmgr": 3
-                }
-            ]
+            "id": 11
         }
     ]
 }

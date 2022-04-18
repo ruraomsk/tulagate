@@ -3,6 +3,7 @@ package device
 import (
 	"time"
 
+	"github.com/ruraomsk/ag-server/binding"
 	"github.com/ruraomsk/ag-server/comm"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/tulagate/controller"
@@ -28,5 +29,5 @@ type Device struct {
 	ErrorTech      []string
 	LastSendStatus time.Time
 	DK             pudge.DK
-	MGRS           map[int]controller.MGR
+	MGRS           map[int]binding.MGR
 }

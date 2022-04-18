@@ -3,6 +3,7 @@ package device
 import (
 	"time"
 
+	"github.com/ruraomsk/ag-server/binding"
 	"github.com/ruraomsk/ag-server/comm"
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
@@ -20,7 +21,7 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 		region := pudge.Region{Region: setup.Set.Region, Area: v.Area, ID: v.ID}
 		device := Device{OneSet: v, Region: region, DevPhases: make(chan comm.DevPhases),
 			MessageForMe: make(chan controller.MessageFromAmi, 10), ErrorTech: make([]string, 0), LastSendStatus: time.Now(),
-			clear: make(chan interface{}), MGRS: make(map[int]controller.MGR)}
+			clear: make(chan interface{}), MGRS: make(map[int]binding.MGR)}
 		cross, err := db.GetCross(region)
 		if err != nil {
 			logger.Error.Print(err.Error())
@@ -34,8 +35,10 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 		} else {
 			device.Ctrl = ctrl
 		}
-		for _, m := range v.MGRs {
-			device.MGRS[m.Phase] = m
+		for _, m := range device.Cross.Arrays.MGRs {
+			if m.TLen != 0 && m.TMGR != 0 {
+				device.MGRS[m.Phase] = m
+			}
 		}
 		idToRegion[device.Cross.IDevice] = region
 		uidToRegion[v.IDExternal] = region

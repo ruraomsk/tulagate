@@ -91,8 +91,8 @@ loop:
 	for {
 		<-c
 		fmt.Println("\nWait make abort...")
-		uptransport.DebugStopAmi <- 1
-		time.Sleep(time.Second)
+		// uptransport.DebugStopAmi <- 1
+		// time.Sleep(time.Second)
 		stop <- 1
 		time.Sleep(5 * time.Second)
 		break loop

@@ -60,8 +60,8 @@ github.com/onsi/gomega v1.7.0/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1Cpa
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
-github.com/ruraomsk/ag-server v0.0.0-20220414061309-b7e53662c258 h1:SGgIEor857aJ6pk7U9qHqWI2SgG4r3XDzF2dRw9nE74=
-github.com/ruraomsk/ag-server v0.0.0-20220414061309-b7e53662c258/go.mod h1:LwgZtJIoUqVT+qDhr8AqE7mTOD35m22P1LCETYvkMrw=
+github.com/ruraomsk/ag-server v0.0.0-20220418040647-76620d3fb072 h1:SmK5tlcPdXYja9TB4dxDfWi2xvfgM733V62ChCi5Jzg=
+github.com/ruraomsk/ag-server v0.0.0-20220418040647-76620d3fb072/go.mod h1:LwgZtJIoUqVT+qDhr8AqE7mTOD35m22P1LCETYvkMrw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
