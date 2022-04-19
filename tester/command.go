@@ -99,8 +99,10 @@ func TestCommand() {
 		senderCommand("device5", "StartCoordination", pl)
 		senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
 		senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
-		time.Sleep(300 * time.Second)
-
+		time.Sleep(10 * time.Second)
+		senderCommand("device3", "GetCoordination", "")
+		senderCommand("device5", "GetCoordination", "")
+		time.Sleep(5 * time.Second)
 		senderCommand("device3", "HoldPhase", `{"phase_number":1,"max_duration":70,"unhold_phase":true}`)
 		senderCommand("device5", "HoldPhase", `{"phase_number":1,"max_duration":70,"unhold_phase":true}`)
 		time.Sleep(120 * time.Second)

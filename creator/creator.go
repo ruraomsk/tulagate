@@ -21,6 +21,9 @@ var message = `Вы начинаете подготовку к работе си
 Кроме этого Вам необходимо остановить программы ag-server и TLServer.
 Если вы не этого хотели введите Нет, иначе наберите Да и продолжим....
 `
+var deleteTableBase = `
+DROP TABLE IF EXISTS public."base";
+`
 
 func Creator(dks *controller.DKSet) {
 	var repl string
@@ -51,6 +54,8 @@ func Creator(dks *controller.DKSet) {
 		break
 	}
 	fmt.Println("Соединение с базой данных установлено...")
+	db.Exec(deleteTableBase)
+	fmt.Println("Удалена таблица базовых привязок...")
 	for _, v := range dks.DKSets {
 		rows, err := db.Query("select state from public.\"cross\" where region=$1 and area=$2 and id=$3;", setup.Set.Region, v.Area, v.ID)
 		if err != nil {

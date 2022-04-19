@@ -101,8 +101,11 @@ func (d *Device) worker() {
 				d.sendReplayToAmi(d.executeSwitchProgram(message))
 			case "StartCoordination":
 				message = d.insertMGR(message)
-				logger.Debug.Print(message)
 				d.sendReplayToAmi(d.executeStartCoordination(message))
+			case "GetCoordination":
+				d.loadData()
+				d.executeGetCoordination()
+				// logger.Debug.Print(repl)
 			default:
 				logger.Error.Printf("not found %v", message)
 				d.sendReplayToAmi(fmt.Sprintf("%s not supported", message.Action))
