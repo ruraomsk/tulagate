@@ -28,7 +28,7 @@ func (d *Device) worker() {
 	baseCross, _ := db.GetStartCross(d.Region)
 	db.MoveData(&d.Cross, &baseCross)
 	agtransport.SendCross <- pudge.UserCross{State: d.Cross}
-	logger.Info.Printf("Откатились %v", d.Cross.IDevice)
+	logger.Info.Printf("Откатились на базовое состояние %v", d.Cross.IDevice)
 	tickSFDK := time.NewTicker(time.Minute)
 	tickOneSecond := time.NewTicker(time.Second)
 	d.executeStartWork()
@@ -41,7 +41,7 @@ func (d *Device) worker() {
 			baseCross, _ := db.GetStartCross(d.Region)
 			db.MoveData(&d.Cross, &baseCross)
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}
-			logger.Info.Printf("Откатились %v", d.Cross.IDevice)
+			logger.Info.Printf("Откатились по разрыву связи с верхом %v", d.Cross.IDevice)
 		case <-tickOneSecond.C:
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()

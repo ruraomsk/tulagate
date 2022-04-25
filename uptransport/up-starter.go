@@ -19,7 +19,7 @@ var SendToAmiChan chan controller.MessageToAmi
 var internalSendToAmiChan chan controller.MessageToAmi
 var DebugStopAmi chan interface{}
 var workAmi bool
-var timeKeepAliveAmi = time.Duration(1 * time.Minute)
+var timeKeepAliveAmi time.Duration
 
 // var amiClient proto.AMIClient  //= proto.NewAMIClient(grpcConn)
 // var ctx context.Context        //= metadata.NewOutgoingContext(context.Background(), metadata.Pairs("protocol", "dkst"))
@@ -29,7 +29,7 @@ func Starter() {
 	SendToAmiChan = make(chan controller.MessageToAmi, 1000)
 	internalSendToAmiChan = make(chan controller.MessageToAmi, 1000)
 	DebugStopAmi = make(chan interface{})
-
+	timeKeepAliveAmi = time.Duration(setup.Set.TimeKeepAliveAmi) * time.Second
 	workAmi = false
 	go controlConnect()
 	/* Подключение к gRPC */
@@ -76,9 +76,8 @@ func Starter() {
 }
 func controlConnect() {
 	// logger.Debug.Print("empty")
-	time.Sleep(10 * time.Second)
+	// time.Sleep(10 * time.Second)
 	intervalTime := time.NewTimer(timeKeepAliveAmi)
-	intervalTime.Stop()
 	oneSecond := time.NewTicker(time.Second)
 	sended := false
 	for {
@@ -86,9 +85,14 @@ func controlConnect() {
 		case <-oneSecond.C:
 			if !workAmi {
 				if !sended {
-					// logger.Debug.Println("Начинаем считать время ")
+					logger.Debug.Println("Начинаем считать время ")
 					intervalTime = time.NewTimer(timeKeepAliveAmi)
 					sended = true
+				}
+			} else {
+				if sended {
+					sended = false
+					intervalTime = time.NewTimer(timeKeepAliveAmi)
 				}
 			}
 		case message := <-SendToAmiChan:

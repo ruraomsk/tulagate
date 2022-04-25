@@ -3,6 +3,7 @@
 	remotePort = 34222
 	myname="tulagate"
 	region=1
+	keepalive=300
 [dataBase]
 	host= "192.168.115.25"
 	port= 5432

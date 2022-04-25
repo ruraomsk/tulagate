@@ -5,13 +5,14 @@ var (
 )
 
 type Setup struct {
-	Region     int      `toml:"region"`
-	LogPath    string   `toml:"logpath"`
-	RemoteHost string   `toml:"remoteHost"`
-	RemotePort int      `toml:"remotePort"`
-	DataBase   DataBase `toml:"dataBase"`
-	AgServer   AgServer `toml:"agserver"`
-	MyName     string   `toml:"myname"`
+	Region           int      `toml:"region"`
+	LogPath          string   `toml:"logpath"`
+	RemoteHost       string   `toml:"remoteHost"`
+	RemotePort       int      `toml:"remotePort"`
+	DataBase         DataBase `toml:"dataBase"`
+	AgServer         AgServer `toml:"agserver"`
+	MyName           string   `toml:"myname"`
+	TimeKeepAliveAmi int      `toml:"keepalive"`
 }
 
 //DataBase настройки базы данных postresql
