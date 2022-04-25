@@ -46,6 +46,9 @@ type SetMode struct {
 	Mode       int  `json:"mode"`       // 3 - желтое мигание, 4 - кругом красный, 5 - все светофоры выключенны
 	Is_enabled bool `json:"is_enabled"` // Включить / Выключить
 }
+type ChanelStat struct {
+	Chanels [16]int `json:"chanels"`
+}
 
 //HoldPhase Включение удержания заданной фазы. Переводит поле mode в структуре ответа на действие Status в значение "удержание фазы". Инициатор действия сервер. В теле запроса приходит следующая структура:
 type HoldPhase struct {

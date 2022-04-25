@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/ruraomsk/tulagate/controller"
+	"github.com/ruraomsk/tulagate/setup"
 )
 
 func (d *Device) insertMGR(message controller.MessageFromAmi) controller.MessageFromAmi {
@@ -22,6 +23,9 @@ func (d *Device) insertMGR(message controller.MessageFromAmi) controller.Message
 		return setter.Phases[i].Phase_order < setter.Phases[j].Phase_order
 	})
 	for i := 0; i < size; i++ {
+		if !setup.Set.MGRSet {
+			continue
+		}
 		m, is := d.MGRS[setter.Phases[i].Phase_number]
 		if !is {
 			continue

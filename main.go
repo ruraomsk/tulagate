@@ -22,6 +22,7 @@ import (
 	"github.com/ruraomsk/tulagate/device"
 	"github.com/ruraomsk/tulagate/setup"
 	"github.com/ruraomsk/tulagate/tester"
+	"github.com/ruraomsk/tulagate/tulastat"
 	"github.com/ruraomsk/tulagate/uptransport"
 )
 
@@ -82,9 +83,14 @@ func main() {
 	<-next
 	go uptransport.Starter()
 
+	tulastat.StatisticStart()
+
 	go device.Starter(&dkset, stop, next)
 	<-next
 	go tester.TestCommand()
+
+	go tester.Maker()
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 loop:

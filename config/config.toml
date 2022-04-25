@@ -4,6 +4,8 @@
 	myname="tulagate"
 	region=1
 	keepalive=300
+	mgrset=true					#использовать ли МГР?
+	timestat=10
 [dataBase]
 	host= "192.168.115.25"
 	port= 5432

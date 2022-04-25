@@ -31,6 +31,13 @@ func (d *Device) worker() {
 	logger.Info.Printf("Откатились на базовое состояние %v", d.Cross.IDevice)
 	tickSFDK := time.NewTicker(time.Minute)
 	tickOneSecond := time.NewTicker(time.Second)
+	if setup.Set.MGRSet {
+		//есть МГР
+		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
+	} else {
+		//нет МГР
+		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+	}
 	d.executeStartWork()
 	// }
 	for {
@@ -42,10 +49,22 @@ func (d *Device) worker() {
 			db.MoveData(&d.Cross, &baseCross)
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}
 			logger.Info.Printf("Откатились по разрыву связи с верхом %v", d.Cross.IDevice)
+			//нет МГР
+			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
 		case <-tickOneSecond.C:
+			ptime := TimeNowOfSecond()
+			if ptime%d.Stat.interval == 0 {
+				d.sendStatistics(ptime)
+			}
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()
 				continue
+			}
+			if setup.Set.MGRSet {
+				mgr := d.Stat.nowStat.getMGRword()
+				if mgr != 0 {
+					agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0e, Params: mgr}
+				}
 			}
 			if d.HoldPhase.Unhold_phase {
 				//Есть команда на удержание фазы
@@ -67,6 +86,16 @@ func (d *Device) worker() {
 			if time.Since(d.LastSendStatus) > time.Minute {
 				uptransport.SendToAmiChan <- d.sendStatus()
 			}
+			if setup.Set.MGRSet {
+				if time.Since(d.LastReciveStat) > time.Duration(setup.Set.TimeKeepStatistic)*time.Second {
+					//нет МГР
+					agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+				} else {
+					//есть МГР
+					agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
+				}
+			}
+
 		case <-tickSFDK.C:
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()
@@ -106,6 +135,8 @@ func (d *Device) worker() {
 				d.loadData()
 				d.executeGetCoordination()
 				// logger.Debug.Print(repl)
+			case "ChanelStat":
+				d.executeAddStat(message)
 			default:
 				logger.Error.Printf("not found %v", message)
 				d.sendReplayToAmi(fmt.Sprintf("%s not supported", message.Action))

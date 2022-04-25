@@ -28,6 +28,18 @@ type Device struct {
 	State          int //State  в их понимании
 	ErrorTech      []string
 	LastSendStatus time.Time
+	LastReciveStat time.Time
 	DK             pudge.DK
 	MGRS           map[int]binding.MGR
+	Stat           statistic
+}
+type statistic struct {
+	tp       int
+	interval int     //Интервал усреднения в секундах
+	nowStat  nowStat //Текущая статистика
+	finStat  nowStat
+	count    int //счетчик
+}
+type nowStat struct {
+	stat []int
 }
