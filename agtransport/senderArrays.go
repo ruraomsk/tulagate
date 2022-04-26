@@ -42,7 +42,7 @@ func senderArrays() {
 					logger.Error.Printf("%v %s", cross, err.Error())
 					break loop
 				}
-				logger.Debug.Printf("send cross %d %d %d", cross.State.Region, cross.State.Area, cross.State.ID)
+				// logger.Debug.Printf("send cross %d %d %d", cross.State.Region, cross.State.Area, cross.State.ID)
 				writer.WriteString(string(buffer))
 				writer.WriteString("\n")
 				err = writer.Flush()

@@ -32,6 +32,7 @@ type Device struct {
 	DK             pudge.DK
 	MGRS           map[int]binding.MGR
 	Stat           statistic
+	LastMGR        int
 }
 type statistic struct {
 	tp       int

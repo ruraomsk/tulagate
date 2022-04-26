@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/tulagate/controller"
 	"github.com/ruraomsk/tulagate/tulastat"
@@ -39,14 +38,18 @@ func (d *Device) sendStatistics(ptime int) {
 	s := pudge.Statistic{Period: ptime / d.Stat.interval, Type: d.Stat.tp, TLen: d.Stat.interval / 60,
 		Hour: ptime / 3600, Min: (ptime % 3600) / 60, Datas: make([]pudge.DataStat, 0)}
 	// logger.Debug.Print(d.Region, d.Stat.finStat)
+	good := 1
+	if d.Stat.count > 45 {
+		good = 0
+	}
 	for i, v := range d.Stat.finStat.stat {
 		if d.Stat.tp == 2 {
-			s.Datas = append(s.Datas, pudge.DataStat{Chanel: i + 1, Status: 0, Speed: v})
+			s.Datas = append(s.Datas, pudge.DataStat{Chanel: i + 1, Status: good, Speed: v})
 		} else {
-			s.Datas = append(s.Datas, pudge.DataStat{Chanel: i + 1, Status: 0, Intensiv: v})
+			s.Datas = append(s.Datas, pudge.DataStat{Chanel: i + 1, Status: good, Intensiv: v})
 		}
 	}
-	logger.Debug.Print(s)
+	// logger.Debug.Print(s)
 	tulastat.StatisticChan <- tulastat.RecordStat{Region: d.Region, Stat: s}
 	d.initStatistic()
 }

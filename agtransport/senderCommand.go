@@ -43,6 +43,9 @@ func senderCommand() {
 					logger.Error.Printf("%v %s", cmd, err.Error())
 					break loop
 				}
+				// if cmd.Command == 0x0e || cmd.Command == 0x0f {
+				// 	continue
+				// }
 				// logger.Debug.Print(string(buffer))
 				writer.WriteString(string(buffer))
 				writer.WriteString("\n")

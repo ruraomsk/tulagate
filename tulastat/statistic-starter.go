@@ -50,6 +50,7 @@ func workerStatictics() {
 				json.Unmarshal(buf, &state)
 				needInsert = false
 				state.Statistics = append(state.Statistics, rs.Stat)
+				break
 			}
 			rows.Close()
 			if needInsert {

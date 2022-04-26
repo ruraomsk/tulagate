@@ -21,5 +21,6 @@ func Maker() {
 		}
 		buff, _ := json.Marshal(s)
 		senderCommand("device3", "ChanelStat", string(buff))
+		senderCommand("device5", "ChanelStat", string(buff))
 	}
 }

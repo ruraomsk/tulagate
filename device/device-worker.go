@@ -20,7 +20,7 @@ var err error
 
 func (d *Device) worker() {
 	//При запуске сразу шлем СФДК
-	logger.Debug.Printf("device %v", d.Region)
+	logger.Info.Printf("Начинаем работу %s %v", d.OneSet.IDExternal, d.Region)
 	for !agtransport.ReadyAgTransport() {
 		time.Sleep(time.Second)
 	}
@@ -31,12 +31,17 @@ func (d *Device) worker() {
 	logger.Info.Printf("Откатились на базовое состояние %v", d.Cross.IDevice)
 	tickSFDK := time.NewTicker(time.Minute)
 	tickOneSecond := time.NewTicker(time.Second)
-	if setup.Set.MGRSet {
-		//есть МГР
-		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
-	} else {
-		//нет МГР
-		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+
+	if d.Ctrl.IsConnected() {
+		if setup.Set.MGRSet {
+			//есть МГР
+			d.LastMGR = 1
+			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
+		} else {
+			//нет МГР
+			d.LastMGR = 0
+			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+		}
 	}
 	d.executeStartWork()
 	// }
@@ -49,8 +54,15 @@ func (d *Device) worker() {
 			db.MoveData(&d.Cross, &baseCross)
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}
 			logger.Info.Printf("Откатились по разрыву связи с верхом %v", d.Cross.IDevice)
-			//нет МГР
-			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+			if d.Ctrl.IsConnected() {
+				if setup.Set.MGRSet {
+					//нет МГР
+					if d.LastMGR == 1 {
+						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+						d.LastMGR = 0
+					}
+				}
+			}
 		case <-tickOneSecond.C:
 			ptime := TimeNowOfSecond()
 			if ptime%d.Stat.interval == 0 {
@@ -59,12 +71,6 @@ func (d *Device) worker() {
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()
 				continue
-			}
-			if setup.Set.MGRSet {
-				mgr := d.Stat.nowStat.getMGRword()
-				if mgr != 0 {
-					agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0e, Params: mgr}
-				}
 			}
 			if d.HoldPhase.Unhold_phase {
 				//Есть команда на удержание фазы
@@ -86,13 +92,30 @@ func (d *Device) worker() {
 			if time.Since(d.LastSendStatus) > time.Minute {
 				uptransport.SendToAmiChan <- d.sendStatus()
 			}
+			d.loadData()
+			if !d.Ctrl.IsConnected() {
+				continue
+			}
+			if setup.Set.MGRSet {
+				mgr := d.Stat.nowStat.getMGRword()
+				d.Stat.nowStat.init()
+				if mgr != 0 {
+					agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0e, Params: mgr}
+				}
+			}
 			if setup.Set.MGRSet {
 				if time.Since(d.LastReciveStat) > time.Duration(setup.Set.TimeKeepStatistic)*time.Second {
 					//нет МГР
-					agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+					if d.LastMGR == 1 {
+						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+						d.LastMGR = 0
+					}
 				} else {
 					//есть МГР
-					agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
+					if d.LastMGR == 0 {
+						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
+						d.LastMGR = 1
+					}
 				}
 			}
 

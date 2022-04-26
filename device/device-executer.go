@@ -14,12 +14,14 @@ import (
 )
 
 func (d *Device) executeStartWork() {
+	d.offMessage()
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 9}
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: 0}
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 4, Params: 1}
 
 }
 func (d *Device) stop() {
+	d.offMessage()
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 9}
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: 0}
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 4, Params: 0}
@@ -30,10 +32,13 @@ func (d *Device) sendReplayToAmi(message string) {
 	d.ErrorTech = append(d.ErrorTech, message)
 	uptransport.SendToAmiChan <- d.sendStatus()
 	d.ErrorTech = make([]string, 0)
-
 }
 func (d *Device) executeSetMode(message controller.MessageFromAmi) string {
 	var setter controller.SetMode
+	if !d.Ctrl.IsConnected() {
+		d.offMessage()
+		return "device offline"
+	}
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
 		return err.Error()
@@ -54,6 +59,11 @@ func (d *Device) executeSetMode(message controller.MessageFromAmi) string {
 }
 func (d *Device) executeHoldPhase(message controller.MessageFromAmi) string {
 	var setter controller.HoldPhase
+	if !d.Ctrl.IsConnected() {
+		d.offMessage()
+		return "device offline"
+	}
+
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
 		return err.Error()
@@ -75,6 +85,9 @@ func (d *Device) executeHoldPhase(message controller.MessageFromAmi) string {
 }
 func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string {
 	var setter controller.SwitchProgram
+	if !d.Ctrl.IsConnected() {
+		return "device offline"
+	}
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
 		return err.Error()
@@ -96,7 +109,7 @@ func (d *Device) executeStartCoordination(message controller.MessageFromAmi) str
 	if err != nil {
 		return err.Error()
 	}
-	logger.Debug.Println(setter)
+	// logger.Debug.Println(setter)
 	if setter.Programm_number < 1 || setter.Programm_number > 12 {
 		return fmt.Sprintf("unsupported %d programm", setter.Programm_number)
 	}
@@ -150,7 +163,7 @@ func (d *Device) executeStartCoordination(message controller.MessageFromAmi) str
 				}
 				d.Cross.Arrays.SetDK.DK[i].Stages[j].Number = v.Phase_number
 				if tnow+v.Phase_duration >= tcycle {
-					logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i].Stages[j])
+					// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i].Stages[j])
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Trs = true
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tcycle
 					tnow += v.Phase_duration - tcycle
@@ -160,10 +173,15 @@ func (d *Device) executeStartCoordination(message controller.MessageFromAmi) str
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tnow
 				}
 			}
-			logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
+			// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}
 			return "ok"
 		}
 	}
 	return fmt.Sprintf("%d нет такого плана в системе", setter.Programm_number)
+}
+func (d *Device) offMessage() {
+	if !d.Ctrl.IsConnected() {
+		logger.Error.Printf("Устройство %s %v не на связи ", d.OneSet.IDExternal, d.Region)
+	}
 }
