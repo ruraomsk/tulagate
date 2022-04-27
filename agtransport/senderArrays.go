@@ -54,6 +54,8 @@ func senderArrays() {
 		}
 		workSenderArrays = false
 		socket.Close()
+		for range internalSendCross {
+		}
 	}
 
 }

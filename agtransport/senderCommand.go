@@ -58,5 +58,7 @@ func senderCommand() {
 		}
 		workSenderCommand = false
 		socket.Close()
+		for range internalCommandARM {
+		}
 	}
 }
