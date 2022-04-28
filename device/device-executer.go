@@ -10,6 +10,7 @@ import (
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/tulagate/agtransport"
 	"github.com/ruraomsk/tulagate/controller"
+	"github.com/ruraomsk/tulagate/db"
 	"github.com/ruraomsk/tulagate/uptransport"
 )
 
@@ -39,6 +40,9 @@ func (d *Device) executeSetMode(message controller.MessageFromAmi) string {
 		d.offMessage()
 		return "device offline"
 	}
+	if !db.GetControlStatus(d.Cross.StatusDevice) {
+		return "device out of control"
+	}
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
 		return err.Error()
@@ -63,7 +67,9 @@ func (d *Device) executeHoldPhase(message controller.MessageFromAmi) string {
 		d.offMessage()
 		return "device offline"
 	}
-
+	if !db.GetControlStatus(d.Cross.StatusDevice) {
+		return "device out of control"
+	}
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
 		return err.Error()
@@ -87,6 +93,9 @@ func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string 
 	var setter controller.SwitchProgram
 	if !d.Ctrl.IsConnected() {
 		return "device offline"
+	}
+	if !db.GetControlStatus(d.Cross.StatusDevice) {
+		return "device out of control"
 	}
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
