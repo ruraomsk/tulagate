@@ -91,54 +91,58 @@ var sl = `{
 }
 `
 
+func cycle() {
+	time.Sleep(3 * time.Second)
+	senderCommand("device3", "GetCoordination", "")
+	senderCommand("device5", "GetCoordination", "")
+
+	senderCommand("device3", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
+	senderCommand("device5", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
+	time.Sleep(30 * time.Second)
+
+	senderCommand("device3", "HoldPhase", `{"phase_number":2,"max_duration":30,"unhold_phase":true}`)
+	senderCommand("device5", "HoldPhase", `{"phase_number":2,"max_duration":30,"unhold_phase":true}`)
+	time.Sleep(30 * time.Second)
+
+	senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
+	senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
+
+	time.Sleep(30 * time.Second)
+	senderCommand("device3", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
+	senderCommand("device5", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
+	time.Sleep(30 * time.Second)
+	senderCommand("device3", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
+	senderCommand("device5", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
+	time.Sleep(60 * time.Second)
+
+	senderCommand("device3", "SetMode", `{"mode":3,"is_enabled":true}`)
+	senderCommand("device5", "SetMode", `{"mode":3,"is_enabled":true}`)
+	time.Sleep(10 * time.Second)
+
+	senderCommand("device3", "SetMode", `{"mode":5,"is_enabled":true}`)
+	senderCommand("device5", "SetMode", `{"mode":5,"is_enabled":true}`)
+	time.Sleep(10 * time.Second)
+
+	senderCommand("device3", "SetMode", `{"mode":0,"is_enabled":false}`)
+	senderCommand("device5", "SetMode", `{"mode":0,"is_enabled":false}`)
+	time.Sleep(10 * time.Second)
+
+}
 func TestCommand() {
 	for {
 		time.Sleep(2 * time.Second)
 		senderCommand("device3", "StartCoordination", pl)
 		senderCommand("device5", "StartCoordination", pl)
 		time.Sleep(10 * time.Second)
-		senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
-		senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
-		time.Sleep(3 * time.Second)
-		senderCommand("device3", "GetCoordination", "")
-		senderCommand("device5", "GetCoordination", "")
-		senderCommand("device3", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
-		senderCommand("device5", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
-		time.Sleep(30 * time.Second)
-		senderCommand("device3", "HoldPhase", `{"phase_number":2,"max_duration":30,"unhold_phase":true}`)
-		senderCommand("device5", "HoldPhase", `{"phase_number":2,"max_duration":30,"unhold_phase":true}`)
-		time.Sleep(30 * time.Second)
-
-		senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
-		senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
-		time.Sleep(30 * time.Second)
-		senderCommand("device3", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
-		senderCommand("device5", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
-		time.Sleep(30 * time.Second)
-		senderCommand("device3", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
-		senderCommand("device5", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
-		time.Sleep(60 * time.Second)
-
-		senderCommand("device3", "SetMode", `{"mode":3,"is_enabled":true}`)
-		senderCommand("device5", "SetMode", `{"mode":3,"is_enabled":true}`)
-		time.Sleep(10 * time.Second)
-		senderCommand("device3", "SetMode", `{"mode":4,"is_enabled":true}`)
-		senderCommand("device5", "SetMode", `{"mode":4,"is_enabled":true}`)
-		time.Sleep(10 * time.Second)
-		senderCommand("device3", "SetMode", `{"mode":5,"is_enabled":true}`)
-		senderCommand("device5", "SetMode", `{"mode":5,"is_enabled":true}`)
-		time.Sleep(10 * time.Second)
-		senderCommand("device3", "SetMode", `{"mode":0,"is_enabled":false}`)
-		senderCommand("device5", "SetMode", `{"mode":0,"is_enabled":false}`)
-		time.Sleep(10 * time.Second)
-
+		cycle()
 		senderCommand("device3", "StartCoordination", pl1)
 		senderCommand("device5", "StartCoordination", pl1)
-		time.Sleep(30 * time.Second)
-
+		time.Sleep(10 * time.Second)
+		cycle()
 		senderCommand("device3", "StartCoordination", sl)
 		senderCommand("device5", "StartCoordination", sl)
-
+		time.Sleep(10 * time.Second)
+		cycle()
 	}
 
 }
