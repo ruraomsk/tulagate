@@ -63,20 +63,28 @@ type SwitchProgram struct {
 	Switch_default  bool `json:"switch_default"` // Флаг установки значения по умолчанию
 }
 
-//StartCoordination Включение плана координации. Инициатор действия сервер. В теле запроса приходит следующая структура:
-type StartCoordination struct {
-	Programm_number int     `json:"program_number"` // Номер программы
-	Phases          []Phase `json:"phases"`         // Список фаз
-	Offset          int     `json:"offset"`         // Смещение начала программы в сек
-	IsEnabled       bool    `json:"isEnabled"`      // Вкл / Выкл
+type Programm struct {
+	Number    int     `json:"number"`     // номер прогрммы
+	Offset    int     `json:"offset"`     // смещение прогрммы (скорее всего тут это не нужно, так как для каждого плана координации смещение будет свое)
+	IsDefault bool    `json:"is_default"` // признак того, используется прогрмма по умолчанию или нет
+	Phases    []Phase `json:"phases"`     // массив фаз
 }
 
 type Phase struct {
-	Phase_number   int `json:"phase_number"`   //Номер фазы
-	Phase_duration int `json:"phase_duration"` //Время фазы в секундах
-	Phase_order    int `json:"phase_order"`    //Порядок фазы в программе
-	Max_time       int `json:"max_time"`       //Максимальная граница
-	Min_time       int `json:"min_time"`       //Минимальная граница
+	Number   int     `json:"number"`    // номер фазы
+	Duration int     `json:"duration"`  // общая длительность фазы, ключая длительность всех промтактов
+	TLGroups []Group `json:"tl_groups"` // массив групп светофоров
+}
+
+type Group struct {
+	Number int        `json:"number"`     // номер группы светофоров
+	Color  int        `json:"color"`      // цвет группы светофоров в фазе
+	PTs    []PromTact `json:"prom_tacts"` // массив промтактов
+}
+
+type PromTact struct {
+	Number int `json:"number"` // номер промтакта
+	Color  int `json:"color"`  // цвет промтакта
 }
 type ErrorString struct {
 	Message string `json:"error"`

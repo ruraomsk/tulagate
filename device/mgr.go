@@ -2,7 +2,6 @@ package device
 
 import (
 	"encoding/json"
-	"sort"
 
 	"github.com/ruraomsk/tulagate/controller"
 	"github.com/ruraomsk/tulagate/setup"
@@ -10,33 +9,40 @@ import (
 
 func (d *Device) insertMGR(message controller.MessageFromAmi) controller.MessageFromAmi {
 	result := controller.MessageFromAmi{Action: message.Action}
-	var setter controller.StartCoordination
+	var setter controller.Programm
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
 		return message
 	}
 	size := len(setter.Phases)
-	for i := 0; i < size; i++ {
-		setter.Phases[i].Phase_order = setter.Phases[i].Phase_order * 10
-	}
-	sort.Slice(setter.Phases, func(i, j int) bool {
-		return setter.Phases[i].Phase_order < setter.Phases[j].Phase_order
-	})
+	// for i := 0; i < size; i++ {
+	// 	setter.Phases[i].Phase_order = setter.Phases[i].Phase_order * 10
+	// }
+	// sort.Slice(setter.Phases, func(i, j int) bool {
+	// 	return setter.Phases[i].Phase_order < setter.Phases[j].Phase_order
+	// })
+	phs := make([]controller.Phase, 0)
 	for i := 0; i < size; i++ {
 		if !setup.Set.MGRSet {
+			phs = append(phs, setter.Phases[i])
 			continue
 		}
-		m, is := d.MGRS[setter.Phases[i].Phase_number]
+		m, is := d.MGRS[setter.Phases[i].Number]
 		if !is {
+			phs = append(phs, setter.Phases[i])
 			continue
 		}
-		if setter.Phases[i].Phase_duration > (m.TLen + m.TMGR) {
+		if setter.Phases[i].Duration > (m.TLen + m.TMGR) {
 			//Можно вставить МГР
-			nph := controller.Phase{Phase_number: 0, Phase_order: setter.Phases[i].Phase_order + 1, Phase_duration: m.TMGR}
-			setter.Phases[i].Phase_duration = setter.Phases[i].Phase_duration - m.TMGR
-			setter.Phases = append(setter.Phases, nph)
+			nph := controller.Phase{Number: 0, Duration: m.TMGR}
+			setter.Phases[i].Duration = setter.Phases[i].Duration - m.TMGR
+			phs = append(phs, setter.Phases[i])
+			phs = append(phs, nph)
+		} else {
+			phs = append(phs, setter.Phases[i])
 		}
 	}
+	setter.Phases = phs
 	buffer, err := json.Marshal(setter)
 	if err != nil {
 		return message

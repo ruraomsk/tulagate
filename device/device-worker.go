@@ -151,13 +151,12 @@ func (d *Device) worker() {
 				d.sendReplayToAmi(d.executeHoldPhase(message))
 			case "SwitchProgram":
 				d.sendReplayToAmi(d.executeSwitchProgram(message))
-			case "StartCoordination":
+			case "UploadProgramms":
 				message = d.insertMGR(message)
-				d.sendReplayToAmi(d.executeStartCoordination(message))
+				d.sendReplayToAmi(d.executeUploadProgramms(message))
 			case "GetCoordination":
 				d.loadData()
 				d.executeGetCoordination()
-				// logger.Debug.Print(repl)
 			case "ChanelStat":
 				d.executeAddStat(message)
 			default:

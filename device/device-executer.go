@@ -3,7 +3,6 @@ package device
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
 
 	"github.com/ruraomsk/ag-server/binding"
 	"github.com/ruraomsk/ag-server/logger"
@@ -112,52 +111,58 @@ func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string 
 	return fmt.Sprintf("unsupported %d programm", setter.Programm_number)
 }
 
-func (d *Device) executeStartCoordination(message controller.MessageFromAmi) string {
-	var setter controller.StartCoordination
+func (d *Device) executeUploadProgramms(message controller.MessageFromAmi) string {
+	var setter controller.Programm
+	// logger.Debug.Println(message)
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
+		logger.Error.Println(err.Error())
 		return err.Error()
 	}
 	// logger.Debug.Println(setter)
-	if setter.Programm_number < 1 || setter.Programm_number > 12 {
-		return fmt.Sprintf("unsupported %d programm", setter.Programm_number)
+	if setter.Number < 1 || setter.Number > 12 {
+		logger.Error.Println(fmt.Sprintf("unsupported %d programm", setter.Number))
+		return fmt.Sprintf("unsupported %d programm", setter.Number)
 	}
 	if len(setter.Phases) > 12 {
-		return fmt.Sprintf("слишком много фаз в %d  не больше 12", setter.Programm_number)
+		logger.Error.Printf("слишком много фаз в %d  не больше 12", setter.Number)
+		return fmt.Sprintf("слишком много фаз в %d  не больше 12", setter.Number)
 	}
-	if !setter.IsEnabled {
-		//Удаляем план создаем в нем ЛР
-		for i, v := range d.Cross.Arrays.SetDK.DK {
-			if v.Pk == setter.Programm_number {
-				if v.Pk == setter.Programm_number {
-					d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
-					d.Cross.Arrays.SetDK.DK[i].Tc = 0 //Локальный режим
-					agtransport.SendCross <- pudge.UserCross{State: d.Cross}
-					return "ok"
-				}
-			}
-		}
-		return fmt.Sprintf("%d нет такого плана в системе", setter.Programm_number)
-	}
-	if len(setter.Phases) < 1 {
-		return fmt.Sprintf("слишком мало фаз в %d ", setter.Programm_number)
-	}
+	// if !setter.IsEnabled {
+	// 	//Удаляем план создаем в нем ЛР
+	// 	for i, v := range d.Cross.Arrays.SetDK.DK {
+	// 		if v.Pk == setter.Programm_number {
+	// 			if v.Pk == setter.Programm_number {
+	// 				d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
+	// 				d.Cross.Arrays.SetDK.DK[i].Tc = 0 //Локальный режим
+	// 				agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+	// 				return "ok"
+	// 			}
+	// 		}
+	// 	}
+	// 	return fmt.Sprintf("%d нет такого плана в системе", setter.Programm_number)
+	// }
+	// if len(setter.Phases) < 1 {
+	// 	return fmt.Sprintf("слишком мало фаз в %d ", setter.Number)
+	// }
 	//считаем время цикла
 	tcycle := 0
 	for _, v := range setter.Phases {
-		tcycle += v.Phase_duration
+		tcycle += v.Duration
 	}
 	if setter.Offset >= tcycle {
-		return fmt.Sprintf("смещение цикла не должно быть больше или равно времени цикла в %d программе", setter.Programm_number)
+		logger.Error.Printf("смещение цикла не должно быть больше или равно времени цикла в %d программе", setter.Number)
+		return fmt.Sprintf("смещение цикла не должно быть больше или равно времени цикла в %d программе", setter.Number)
 	}
-	sort.Slice(setter.Phases, func(i, j int) bool {
-		return setter.Phases[i].Phase_order < setter.Phases[j].Phase_order
-	})
-	if setter.Phases[0].Phase_number != 1 {
-		return fmt.Sprintf("первая фаза в цикле всегда должна быть первая в %d программе", setter.Programm_number)
+	// sort.Slice(setter.Phases, func(i, j int) bool {
+	// 	return setter.Phases[i].Phase_order < setter.Phases[j].Phase_order
+	// })
+	if setter.Phases[0].Number != 1 {
+		logger.Error.Printf("первая фаза в цикле всегда должна быть первая в %d программе", setter.Number)
+		return fmt.Sprintf("первая фаза в цикле всегда должна быть первая в %d программе", setter.Number)
 	}
 	for i, v := range d.Cross.Arrays.SetDK.DK {
-		if v.Pk == setter.Programm_number {
+		if v.Pk == setter.Number {
 			d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
 			d.Cross.Arrays.SetDK.DK[i].Tc = tcycle
 			d.Cross.Arrays.SetDK.DK[i].Shift = setter.Offset
@@ -165,29 +170,34 @@ func (d *Device) executeStartCoordination(message controller.MessageFromAmi) str
 			tnow := setter.Offset
 			for j, v := range setter.Phases {
 				d.Cross.Arrays.SetDK.DK[i].Stages[j].Start = tnow
-				if v.Phase_number == 0 {
+				if v.Number == 0 {
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 1
 				} else {
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 0
 				}
-				d.Cross.Arrays.SetDK.DK[i].Stages[j].Number = v.Phase_number
-				if tnow+v.Phase_duration >= tcycle {
+				d.Cross.Arrays.SetDK.DK[i].Stages[j].Number = v.Number
+				if tnow+v.Duration >= tcycle {
 					// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i].Stages[j])
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Trs = true
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tcycle
-					tnow += v.Phase_duration - tcycle
+					tnow += v.Duration - tcycle
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Dt = tnow
 				} else {
-					tnow += v.Phase_duration
+					tnow += v.Duration
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tnow
 				}
 			}
 			// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
+
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+			if setter.IsDefault {
+				db.SetBasePlan(d.Region, d.Cross.Arrays.SetDK, setter.Number)
+			}
 			return "ok"
 		}
 	}
-	return fmt.Sprintf("%d нет такого плана в системе", setter.Programm_number)
+	logger.Error.Printf("%d нет такого плана в системе", setter.Number)
+	return fmt.Sprintf("%d нет такого плана в системе", setter.Number)
 }
 func (d *Device) offMessage() {
 	if !d.Ctrl.IsConnected() {

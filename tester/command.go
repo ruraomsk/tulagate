@@ -39,57 +39,42 @@ import (
 // 	Min_time       int `json:"min_time"`       //Минимальная граница
 // }
 var pl = `{
-	"program_number":1,
+	"number":1,
+	"is_default":true,
 	"offset":10,
-	"isEnabled":true,
 	"phases":[
 		{
-			"phase_number":1,
-			"phase_duration":20,
-			"phase_order":1
+			"number":1,
+			"duration":20
 		},
 		{
-			"phase_number":2,
-			"phase_duration":20,
-			"phase_order":2
+			"number":2,
+			"duration":20
 		},
 		{
-			"phase_number":1,
-			"phase_duration":30,
-			"phase_order":3
+			"number":1,
+			"duration":30
 		},
 		{
-			"phase_number":2,
-			"phase_duration":30,
-			"phase_order":4
+			"number":2,
+			"duration":30
 		}
 	]
 }`
 var pl1 = `{
-	"program_number":1,
+	"number":1,
 	"offset":20,
-	"isEnabled":true,
 	"phases":[
 		{
-			"phase_number":1,
-			"phase_duration":25,
-			"phase_order":1
+			"number":1,
+			"duration":25
 		},
 		{
-			"phase_number":2,
-			"phase_duration":25,
-			"phase_order":2
+			"number":2,
+			"duration":25
 		}
 	]
 }`
-
-var sl = `{
-	"program_number":1,
-	"offset":0,
-	"isEnabled":false,
-	"phases":[]
-}
-`
 
 func cycle() {
 	time.Sleep(3 * time.Second)
@@ -131,16 +116,12 @@ func cycle() {
 func TestCommand() {
 	for {
 		time.Sleep(2 * time.Second)
-		senderCommand("device3", "StartCoordination", pl)
-		senderCommand("device5", "StartCoordination", pl)
+		senderCommand("device3", "UploadProgramms", pl)
+		senderCommand("device5", "UploadProgramms", pl)
 		time.Sleep(10 * time.Second)
 		cycle()
-		senderCommand("device3", "StartCoordination", pl1)
-		senderCommand("device5", "StartCoordination", pl1)
-		time.Sleep(10 * time.Second)
-		cycle()
-		senderCommand("device3", "StartCoordination", sl)
-		senderCommand("device5", "StartCoordination", sl)
+		senderCommand("device3", "UploadProgramms", pl1)
+		senderCommand("device5", "UploadProgramms", pl1)
 		time.Sleep(10 * time.Second)
 		cycle()
 	}
