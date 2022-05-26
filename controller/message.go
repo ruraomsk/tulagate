@@ -13,6 +13,8 @@ type Status struct {
 	Errors                 Errors           `json:"errors"`                 // Описание ошибок
 	Mode                   int              `json:"mode"`                   // Текущий режим: 1 - локальный, 2 - удаленное (центральное) управление, 3 - желтое мигание, 4 - кругом красный, 5 - все светофоры выключенны, 6 - ручное (местное) управление, 7 - удержание фазы, 8 - зеленая улица
 	Timestamp              int64            `json:"timestamp"`              // Время на контроллере
+	Has_Default_Programs   []int            `json:"has_default_programs"`   //Список номеров ПК загруженных верхом
+	Has_Loaded_Programs    []int            `json:"has_loaded_programs"`    //Список номеров всех ПК
 	VAC                    float64          `json:"vac"`                    // Текущее напряжение на контроллере
 	Channels_powers        []float64        `json:"channels_powers"`        // Массив потребляемой мощности по каналам контроллера
 	Channels_state         []Channels_state `json:"channels_state"`         // Состояния каналов контроллера

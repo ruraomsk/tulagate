@@ -116,12 +116,12 @@ func cycle() {
 func TestCommand() {
 	for {
 		time.Sleep(2 * time.Second)
-		senderCommand("device3", "UploadProgramms", pl)
-		senderCommand("device5", "UploadProgramms", pl)
+		senderCommand("device3", "UploadPrograms", pl)
+		senderCommand("device5", "UploadPrograms", pl)
 		time.Sleep(10 * time.Second)
 		cycle()
-		senderCommand("device3", "UploadProgramms", pl1)
-		senderCommand("device5", "UploadProgramms", pl1)
+		senderCommand("device3", "UploadPrograms", pl1)
+		senderCommand("device5", "UploadPrograms", pl1)
 		time.Sleep(10 * time.Second)
 		cycle()
 	}

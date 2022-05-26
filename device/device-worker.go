@@ -137,6 +137,7 @@ func (d *Device) worker() {
 			//Пришло измение по фазам
 			d.DK = dk.DK
 			d.loadData()
+			// logger.Debug.Printf("%v %v", d.Region, d.DK)
 			uptransport.SendToAmiChan <- d.sendStatus()
 		case message := <-d.MessageForMe:
 			if !agtransport.ReadyAgTransport() {
@@ -151,9 +152,10 @@ func (d *Device) worker() {
 				d.sendReplayToAmi(d.executeHoldPhase(message))
 			case "SwitchProgram":
 				d.sendReplayToAmi(d.executeSwitchProgram(message))
-			case "UploadProgramms":
+			case "UploadPrograms":
 				message = d.insertMGR(message)
-				d.sendReplayToAmi(d.executeUploadProgramms(message))
+				// d.sendReplayToAmi(d.executeUploadPrograms(message))
+				d.executeUploadPrograms(message)
 			case "GetCoordination":
 				d.loadData()
 				d.executeGetCoordination()
@@ -193,7 +195,7 @@ func (d *Device) sendNotTransport() {
 }
 func (d *Device) sendStatus() controller.MessageToAmi {
 	message := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "status", Body: "{}"}
-	status := controller.Status{Program_number: d.Cross.PK, Phase_number: d.DK.FDK}
+	status := controller.Status{Program_number: d.Cross.PK, Phase_number: d.DK.FDK, Has_Default_Programs: make([]int, 0), Has_Loaded_Programs: make([]int, 0)}
 	if d.DK.FDK == 9 {
 		status.Tact_number = 1
 		status.Phase_number = d.DK.FTUDK
@@ -296,6 +298,14 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 			logger.Error.Printf("fdk=%d нужна перекодировка!", d.DK.FDK)
 		}
 	}
+	status.Has_Default_Programs = db.LoadBaseProgramm(d.Region)
+	status.Has_Loaded_Programs = make([]int, 0)
+	for _, v := range d.Cross.Arrays.SetDK.DK {
+		if v.Tc > 3 {
+			status.Has_Loaded_Programs = append(status.Has_Loaded_Programs, v.Pk)
+		}
+	}
+
 	status.Timestamp = time.Now().Unix()
 	body, _ := json.Marshal(&status)
 	message.Body = string(body)

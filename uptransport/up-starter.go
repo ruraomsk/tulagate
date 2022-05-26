@@ -36,13 +36,14 @@ func Starter() {
 	grpcURL := fmt.Sprintf("%s:%d", setup.Set.RemoteHost, setup.Set.RemotePort)
 	// grpcConn, err := grpc.Dial(grpcURL, grpc.WithInsecure(), grpc.WithBlock())
 	for {
-		grpcConn, err := grpc.Dial(grpcURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		ctx1, _ := context.WithTimeout(context.Background(), time.Second*5)
+		grpcConn, err := grpc.DialContext(ctx1, grpcURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			logger.Error.Panicf("процедура подключения к gRPC завершена с ошибкой: %s", err.Error())
 			time.Sleep(time.Second)
 			continue
 		}
-		logger.Info.Println("gRPC Соединение установлено")
+		logger.Info.Println("gRPC активно")
 		amiClient := proto.NewAMIClient(grpcConn)
 		ctx := metadata.NewOutgoingContext(context.Background(), metadata.Pairs("protocol", "dkst"))
 		stream, err := amiClient.Run(ctx)
@@ -52,12 +53,17 @@ func Starter() {
 			time.Sleep(5 * time.Second)
 			continue
 		}
+
 		workAmi = true
+		logger.Info.Println("Связь есть с верхом")
 		go SendToAmi(stream)
 		for {
 			recv, err := stream.Recv()
 			if err != nil {
 				logger.Error.Println(err.Error())
+				break
+			}
+			if !workAmi {
 				break
 			}
 			ch, err := db.GetChanelForMessage(recv.ControllerId)
@@ -66,12 +72,13 @@ func Starter() {
 				continue
 			}
 			ch <- controller.MessageFromAmi{Action: recv.Action, Body: recv.Body}
-			logger.Debug.Printf("recv %v", controller.MessageFromAmi{Action: recv.Action, Body: recv.Body})
+			// logger.Debug.Printf("recv %v", controller.MessageFromAmi{Action: recv.Action, Body: recv.Body})
 		}
+		stream.CloseSend()
 		workAmi = false
 		grpcConn.Close()
 		logger.Error.Printf("Связь с верхом оборвалась")
-		time.Sleep(15 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
 func controlConnect() {
@@ -85,7 +92,7 @@ func controlConnect() {
 		case <-oneSecond.C:
 			if !workAmi {
 				if !sended {
-					logger.Debug.Println("Начинаем считать время ")
+					// logger.Debug.Println("Начинаем считать время ")
 					intervalTime = time.NewTimer(timeKeepAliveAmi)
 					sended = true
 				}
@@ -97,7 +104,7 @@ func controlConnect() {
 			}
 		case message := <-SendToAmiChan:
 			if workAmi {
-				// logger.Debug.Println("Начинаем считать время заново")
+				// logger.Debug.Println("Пришло сообщение... Начинаем считать время заново")
 				internalSendToAmiChan <- message
 				intervalTime.Stop()
 				intervalTime = time.NewTimer(timeKeepAliveAmi)
@@ -108,8 +115,14 @@ func controlConnect() {
 	}
 }
 func SendToAmi(stream proto.AMI_RunClient) {
+	defer stream.CloseSend()
+	oneSecond := time.NewTicker(time.Second)
 	for {
 		select {
+		case <-oneSecond.C:
+			if !workAmi {
+				return
+			}
 		case <-DebugStopAmi:
 			workAmi = false
 			return

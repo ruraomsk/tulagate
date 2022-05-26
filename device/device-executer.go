@@ -111,17 +111,17 @@ func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string 
 	return fmt.Sprintf("unsupported %d programm", setter.Programm_number)
 }
 
-func (d *Device) executeUploadProgramms(message controller.MessageFromAmi) string {
+func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string {
 	var setter controller.Programm
 	// logger.Debug.Println(message)
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
-		logger.Error.Println(err.Error())
+		logger.Error.Printf("%s %s", message.Body, err.Error())
 		return err.Error()
 	}
 	// logger.Debug.Println(setter)
 	if setter.Number < 1 || setter.Number > 12 {
-		logger.Error.Println(fmt.Sprintf("unsupported %d programm", setter.Number))
+		logger.Error.Printf("unsupported %d programm", setter.Number)
 		return fmt.Sprintf("unsupported %d programm", setter.Number)
 	}
 	if len(setter.Phases) > 12 {

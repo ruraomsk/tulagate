@@ -32,6 +32,7 @@ func touchBase() {
 }
 
 func SetBasePlan(region pudge.Region, dk binding.SetDK, pk int) {
+	logger.Debug.Printf("Записываем %v pk %d", region, pk)
 	baseMutex.Lock()
 	defer baseMutex.Unlock()
 	rows, err := dbBase.Query("select state from public.\"base\" where region=$1 and area=$2 and id=$3;", region.Region, region.Area, region.ID)
@@ -111,6 +112,9 @@ func GetStartCross(region pudge.Region) (pudge.Cross, error) {
 	return cross, nil
 }
 func ClearPKs(cross *pudge.Cross) {
+	for i := range cross.Arrays.SetDK.DK {
+		cross.Arrays.SetDK.DK[i].Tc = 0
+	}
 	cross.Arrays.MonthSets = *binding.NewYearSets()
 	for i := 0; i < len(cross.Arrays.MonthSets.MonthSets); i++ {
 		for j := 0; j < len(cross.Arrays.MonthSets.MonthSets[i].Days); j++ {
@@ -131,4 +135,17 @@ func ClearPKs(cross *pudge.Cross) {
 	cross.Arrays.DaySets.DaySets[0].Lines[0].PKNom = 1
 
 	cross.Arrays.SetDK = *binding.NewSetDK()
+}
+func LoadBaseProgramm(region pudge.Region) []int {
+	result := make([]int, 0)
+	cross, err := GetStartCross(region)
+	if err != nil {
+		return result
+	}
+	for _, v := range cross.Arrays.SetDK.DK {
+		if v.Tc > 3 {
+			result = append(result, v.Pk)
+		}
+	}
+	return result
 }
