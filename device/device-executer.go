@@ -88,16 +88,22 @@ func (d *Device) executeHoldPhase(message controller.MessageFromAmi) string {
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: setter.Phase_number}
 	return "ok"
 }
+
 func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string {
 	var setter controller.SwitchProgram
+	var err1 = "device offline"
+	var err2 = "device out of control"
 	if !d.Ctrl.IsConnected() {
-		return "device offline"
+		logger.Error.Println(err1)
+		return err1
 	}
 	if !db.GetControlStatus(d.Cross.StatusDevice) {
-		return "device out of control"
+		logger.Error.Println(err2)
+		return err2
 	}
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
+		logger.Error.Println(err.Error())
 		return err.Error()
 	}
 	if !setter.Switch_default {
@@ -108,7 +114,9 @@ func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string 
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: setter.Programm_number}
 		return "ok"
 	}
-	return fmt.Sprintf("unsupported %d programm", setter.Programm_number)
+	err3 := fmt.Sprintf("unsupported %d programm", setter.Programm_number)
+	logger.Error.Printf(err3)
+	return err3
 }
 
 func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string {
@@ -121,12 +129,14 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 	}
 	// logger.Debug.Println(setter)
 	if setter.Number < 1 || setter.Number > 12 {
-		logger.Error.Printf("unsupported %d programm", setter.Number)
-		return fmt.Sprintf("unsupported %d programm", setter.Number)
+		err1 := fmt.Sprintf("unsupported %d programm", setter.Number)
+		logger.Error.Printf(err1)
+		return err1
 	}
 	if len(setter.Phases) > 12 {
-		logger.Error.Printf("слишком много фаз в %d  не больше 12", setter.Number)
-		return fmt.Sprintf("слишком много фаз в %d  не больше 12", setter.Number)
+		err2 := fmt.Sprintf("слишком много фаз в %d  не больше 12", setter.Number)
+		logger.Error.Printf(err2)
+		return err2
 	}
 	// if !setter.IsEnabled {
 	// 	//Удаляем план создаем в нем ЛР
@@ -151,15 +161,17 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 		tcycle += v.Duration
 	}
 	if setter.Offset >= tcycle {
-		logger.Error.Printf("смещение цикла не должно быть больше или равно времени цикла в %d программе", setter.Number)
-		return fmt.Sprintf("смещение цикла не должно быть больше или равно времени цикла в %d программе", setter.Number)
+		err3 := fmt.Sprintf("смещение цикла не должно быть больше или равно времени цикла в %d программе", setter.Number)
+		logger.Error.Printf(err3)
+		return err3
 	}
 	// sort.Slice(setter.Phases, func(i, j int) bool {
 	// 	return setter.Phases[i].Phase_order < setter.Phases[j].Phase_order
 	// })
 	if setter.Phases[0].Number != 1 {
-		logger.Error.Printf("первая фаза в цикле всегда должна быть первая в %d программе", setter.Number)
-		return fmt.Sprintf("первая фаза в цикле всегда должна быть первая в %d программе", setter.Number)
+		err4 := fmt.Sprintf("первая фаза в цикле всегда должна быть первая в %d программе", setter.Number)
+		logger.Error.Printf(err4)
+		return err4
 	}
 	for i, v := range d.Cross.Arrays.SetDK.DK {
 		if v.Pk == setter.Number {
@@ -196,11 +208,53 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 			return "ok"
 		}
 	}
-	logger.Error.Printf("%d нет такого плана в системе", setter.Number)
-	return fmt.Sprintf("%d нет такого плана в системе", setter.Number)
+	err5 := fmt.Sprintf("%d нет такого плана в системе", setter.Number)
+	logger.Error.Printf(err5)
+	return err5
 }
 func (d *Device) offMessage() {
 	if !d.Ctrl.IsConnected() {
 		logger.Error.Printf("Устройство %s %v не на связи ", d.OneSet.IDExternal, d.Region)
 	}
+}
+
+func (d *Device) executeUploadDailyCards(message controller.MessageFromAmi) string {
+	var setter controller.UploadDailyCards
+	err := json.Unmarshal([]byte(message.Body), &setter)
+	if err != nil {
+		logger.Error.Println(err.Error())
+		return err.Error()
+	}
+	send := false
+	for _, v := range setter.Cards {
+		send = true
+		err := v.ToDaySet(&d.Cross.Arrays.DaySets)
+		if err != nil {
+			return err.Error()
+		}
+	}
+	if send {
+		agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+	}
+	return "ok"
+}
+func (d *Device) executeUploadWeekCards(message controller.MessageFromAmi) string {
+	var setter controller.UploadWeekCards
+	err := json.Unmarshal([]byte(message.Body), &setter)
+	if err != nil {
+		logger.Error.Println(err.Error())
+		return err.Error()
+	}
+	send := false
+	for _, v := range setter.Weeks {
+		send = true
+		err := v.ToWeekSet(&d.Cross.Arrays.WeekSets)
+		if err != nil {
+			return err.Error()
+		}
+	}
+	if send {
+		agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+	}
+	return "ok"
 }

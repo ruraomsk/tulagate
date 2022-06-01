@@ -20,7 +20,8 @@ type Status struct {
 	Channels_state         []Channels_state `json:"channels_state"`         // Состояния каналов контроллера
 	Conflict_config        bool             `json:"conflict_config"`        // Флаг наличия конфликта конфигураций
 	Hold_phase_time_remain int              `json:"hold_phase_time_remain"` // Таймер обратного отсчета до конца удержания фазы, в сек
-
+	Has_loaded_daily_cards []int            `json:"has_loaded_daily_cards"` //Перечень загруженных суточных карт
+	Has_loaded_week_cards  []int            `json:"has_loaded_week_cards"`  //Перечень загруженных недельных карт
 }
 
 //Errors Описание ошибок
@@ -99,4 +100,33 @@ type MessageToAmi struct {
 	IDExternal string
 	Action     string
 	Body       string
+}
+
+//UploadDailyCards -загрузка суточных карт
+type UploadDailyCards struct {
+	Cards []DailyCard
+}
+
+//DailyCard -собственно суточная карта
+type DailyCard struct {
+	Number   int    `json:"number"`
+	Programs []Line `json:"programs"`
+}
+
+//Line одно переключение суточной карты
+type Line struct {
+	Number int `json:"number"`
+	Hour   int `json:"hour"`
+	Minute int `json:"minute"`
+}
+
+//UploadWeekCards загрузка недельных карт
+type UploadWeekCards struct {
+	Weeks []Week
+}
+
+//Week собственно недельная карта
+type Week struct {
+	Number     int   `json:"number"`
+	DailyCards []int `json:"daily_cards"`
 }

@@ -144,7 +144,7 @@ func (d *Device) worker() {
 				d.sendNotTransport()
 				continue
 			}
-
+			logger.Debug.Printf("%v %v", d.Region, message)
 			switch message.Action {
 			case "SetMode":
 				d.sendReplayToAmi(d.executeSetMode(message))
@@ -161,9 +161,14 @@ func (d *Device) worker() {
 				d.executeGetCoordination()
 			case "ChanelStat":
 				d.executeAddStat(message)
+			case "UploadDailyCards":
+				d.executeUploadDailyCards(message)
+			case "UploadWeekCards":
+				d.executeUploadWeekCards(message)
 			default:
-				logger.Error.Printf("not found %v", message)
-				d.sendReplayToAmi(fmt.Sprintf("%s not supported", message.Action))
+				s := fmt.Sprintf("%s not supported", message.Action)
+				logger.Error.Printf(s)
+				d.sendReplayToAmi(s)
 			}
 		}
 
@@ -305,7 +310,18 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 			status.Has_Loaded_Programs = append(status.Has_Loaded_Programs, v.Pk)
 		}
 	}
-
+	status.Has_loaded_daily_cards = make([]int, 0)
+	for _, v := range d.Cross.Arrays.DaySets.DaySets {
+		if v.Count != 0 {
+			status.Has_loaded_daily_cards = append(status.Has_loaded_daily_cards, v.Number)
+		}
+	}
+	status.Has_loaded_week_cards = make([]int, 0)
+	for _, v := range d.Cross.Arrays.WeekSets.WeekSets {
+		if !v.IsEmpty() {
+			status.Has_loaded_week_cards = append(status.Has_loaded_week_cards, v.Number)
+		}
+	}
 	status.Timestamp = time.Now().Unix()
 	body, _ := json.Marshal(&status)
 	message.Body = string(body)
