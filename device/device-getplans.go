@@ -1,7 +1,12 @@
 package device
 
 import (
+	"encoding/json"
+	"time"
+
+	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/tulagate/controller"
+	"github.com/ruraomsk/tulagate/uptransport"
 )
 
 func (d *Device) executeGetCoordination() []controller.Programm {
@@ -27,4 +32,32 @@ func (d *Device) executeGetCoordination() []controller.Programm {
 		result = append(result, plan)
 	}
 	return result
+}
+func (d *Device) executeConfig(message controller.MessageFromAmi) string {
+	c := controller.Config{Programs: d.executeGetCoordination(),
+		Cards: controller.UploadDailyCards{Cards: make([]controller.DailyCard, 0)},
+		Weeks: controller.UploadWeekCards{Weeks: make([]controller.Week, 0)}}
+	for _, v := range d.Cross.Arrays.WeekSets.WeekSets {
+		if !isWeekEmpty(v) {
+			c.Weeks.Weeks = append(c.Weeks.Weeks, controller.Week{Number: v.Number, DailyCards: v.Days})
+		}
+	}
+	for _, v := range d.Cross.Arrays.DaySets.DaySets {
+		if v.Count != 0 {
+			crd := controller.DailyCard{Number: v.Number, Programs: make([]controller.Line, 0)}
+			for _, l := range v.Lines {
+				if l.Hour != 0 || l.Min != 0 {
+					crd.Programs = append(crd.Programs, controller.Line{Number: l.PKNom, Hour: l.Hour, Minute: l.Min})
+				}
+			}
+			c.Cards.Cards = append(c.Cards.Cards, crd)
+		}
+	}
+	replay := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "Config", Body: "{}"}
+	body, _ := json.Marshal(&c)
+	replay.Body = string(body)
+	d.LastSendStatus = time.Now()
+	logger.Debug.Println(replay)
+	uptransport.SendToAmiChan <- replay
+	return "ok"
 }

@@ -122,7 +122,7 @@ func ClearPKs(cross *pudge.Cross) {
 		}
 	}
 	cross.Arrays.WeekSets = *binding.NewWeekSets()
-	for i := 0; i < len(cross.Arrays.WeekSets.WeekSets); i++ {
+	for i := 0; i < 1; i++ {
 		for j := 0; j < len(cross.Arrays.WeekSets.WeekSets[i].Days); j++ {
 			cross.Arrays.WeekSets.WeekSets[i].Days[j] = 1
 		}

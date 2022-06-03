@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ruraomsk/ag-server/binding"
 	"github.com/ruraomsk/ag-server/logger"
 	"github.com/ruraomsk/ag-server/pudge"
 	"github.com/ruraomsk/tulagate/agtransport"
@@ -147,11 +148,11 @@ func (d *Device) worker() {
 			logger.Debug.Printf("%v %v", d.Region, message)
 			switch message.Action {
 			case "SetMode":
-				d.sendReplayToAmi(d.executeSetMode(message))
+				d.sendReplayToAmiWithStatus(d.executeSetMode(message))
 			case "HoldPhase":
-				d.sendReplayToAmi(d.executeHoldPhase(message))
+				d.sendReplayToAmiWithStatus(d.executeHoldPhase(message))
 			case "SwitchProgram":
-				d.sendReplayToAmi(d.executeSwitchProgram(message))
+				d.sendReplayToAmiWithStatus(d.executeSwitchProgram(message))
 			case "UploadPrograms":
 				message = d.insertMGR(message)
 				// d.sendReplayToAmi(d.executeUploadPrograms(message))
@@ -165,10 +166,12 @@ func (d *Device) worker() {
 				d.executeUploadDailyCards(message)
 			case "UploadWeekCards":
 				d.executeUploadWeekCards(message)
+			case "Config":
+				d.executeConfig(message)
 			default:
 				s := fmt.Sprintf("%s not supported", message.Action)
 				logger.Error.Printf(s)
-				d.sendReplayToAmi(s)
+				d.sendReplayToAmiWithStatus(s)
 			}
 		}
 
@@ -318,7 +321,7 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 	}
 	status.Has_loaded_week_cards = make([]int, 0)
 	for _, v := range d.Cross.Arrays.WeekSets.WeekSets {
-		if !v.IsEmpty() {
+		if !isWeekEmpty(v) {
 			status.Has_loaded_week_cards = append(status.Has_loaded_week_cards, v.Number)
 		}
 	}
@@ -327,4 +330,12 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 	message.Body = string(body)
 	d.LastSendStatus = time.Now()
 	return message
+}
+func isWeekEmpty(ow binding.OneWeek) bool {
+	for _, v := range ow.Days {
+		if v != 0 {
+			return false
+		}
+	}
+	return true
 }

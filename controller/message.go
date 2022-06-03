@@ -104,7 +104,7 @@ type MessageToAmi struct {
 
 //UploadDailyCards -загрузка суточных карт
 type UploadDailyCards struct {
-	Cards []DailyCard
+	Cards []DailyCard `json:"daily_cards"`
 }
 
 //DailyCard -собственно суточная карта
@@ -122,11 +122,16 @@ type Line struct {
 
 //UploadWeekCards загрузка недельных карт
 type UploadWeekCards struct {
-	Weeks []Week
+	Weeks []Week `json:"week_cards"`
 }
 
 //Week собственно недельная карта
 type Week struct {
 	Number     int   `json:"number"`
 	DailyCards []int `json:"daily_cards"`
+}
+type Config struct {
+	Programs []Programm `json:"programs"`
+	Cards    UploadDailyCards
+	Weeks    UploadWeekCards
 }

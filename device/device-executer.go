@@ -27,7 +27,7 @@ func (d *Device) stop() {
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 4, Params: 0}
 
 }
-func (d *Device) sendReplayToAmi(message string) {
+func (d *Device) sendReplayToAmiWithStatus(message string) {
 	d.ErrorTech = make([]string, 0)
 	d.ErrorTech = append(d.ErrorTech, message)
 	uptransport.SendToAmiChan <- d.sendStatus()
@@ -219,14 +219,14 @@ func (d *Device) offMessage() {
 }
 
 func (d *Device) executeUploadDailyCards(message controller.MessageFromAmi) string {
-	var setter controller.UploadDailyCards
+	var setter []controller.DailyCard
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
 		logger.Error.Println(err.Error())
 		return err.Error()
 	}
 	send := false
-	for _, v := range setter.Cards {
+	for _, v := range setter {
 		send = true
 		err := v.ToDaySet(&d.Cross.Arrays.DaySets)
 		if err != nil {
@@ -239,14 +239,14 @@ func (d *Device) executeUploadDailyCards(message controller.MessageFromAmi) stri
 	return "ok"
 }
 func (d *Device) executeUploadWeekCards(message controller.MessageFromAmi) string {
-	var setter controller.UploadWeekCards
+	var setter []controller.Week
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
 		logger.Error.Println(err.Error())
 		return err.Error()
 	}
 	send := false
-	for _, v := range setter.Weeks {
+	for _, v := range setter {
 		send = true
 		err := v.ToWeekSet(&d.Cross.Arrays.WeekSets)
 		if err != nil {
