@@ -67,10 +67,11 @@ type SwitchProgram struct {
 }
 
 type Programm struct {
-	Number    int     `json:"number"`     // номер прогрммы
-	Offset    int     `json:"offset"`     // смещение прогрммы (скорее всего тут это не нужно, так как для каждого плана координации смещение будет свое)
-	IsDefault bool    `json:"is_default"` // признак того, используется прогрмма по умолчанию или нет
-	Phases    []Phase `json:"phases"`     // массив фаз
+	Number          int     `json:"number"`          // номер прогрммы
+	Offset          int     `json:"offset"`          // смещение прогрммы (скорее всего тут это не нужно, так как для каждого плана координации смещение будет свое)
+	Is_Coordination bool    `json:"is_coordination"` //True если ПК иначе ЛР
+	IsDefault       bool    `json:"is_default"`      // признак того, используется прогрмма по умолчанию или нет
+	Phases          []Phase `json:"phases"`          // массив фаз
 }
 
 type Phase struct {

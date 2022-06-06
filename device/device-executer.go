@@ -179,6 +179,9 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 			d.Cross.Arrays.SetDK.DK[i].Tc = tcycle
 			d.Cross.Arrays.SetDK.DK[i].Shift = setter.Offset
 			d.Cross.Arrays.SetDK.DK[i].TypePU = 0
+			if setter.Is_Coordination {
+				d.Cross.Arrays.SetDK.DK[i].TypePU = 1
+			}
 			tnow := setter.Offset
 			for j, v := range setter.Phases {
 				d.Cross.Arrays.SetDK.DK[i].Stages[j].Start = tnow

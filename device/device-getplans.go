@@ -12,7 +12,10 @@ import (
 func (d *Device) executeGetCoordination() []controller.Programm {
 	result := make([]controller.Programm, 0)
 	for _, v := range d.Cross.Arrays.SetDK.DK {
-		plan := controller.Programm{Number: v.Pk, Offset: v.Shift, Phases: make([]controller.Phase, 0)}
+		plan := controller.Programm{Number: v.Pk, Offset: v.Shift, Phases: make([]controller.Phase, 0), Is_Coordination: false}
+		if v.TypePU == 1 {
+			plan.Is_Coordination = true
+		}
 		phase := controller.Phase{}
 		for _, ph := range v.Stages {
 			if ph.Number == 0 && ph.Start == 0 && ph.Stop == 0 {
