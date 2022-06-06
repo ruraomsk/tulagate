@@ -131,7 +131,7 @@ type Week struct {
 	DailyCards []int `json:"daily_cards"`
 }
 type Config struct {
-	Programs []Programm `json:"programs"`
-	Cards    UploadDailyCards
-	Weeks    UploadWeekCards
+	Programs []Programm  `json:"programs"`
+	Cards    []DailyCard `json:"daily_cards"`
+	Weeks    []Week      `json:"week_cards"`
 }

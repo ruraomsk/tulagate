@@ -35,11 +35,11 @@ func (d *Device) executeGetCoordination() []controller.Programm {
 }
 func (d *Device) executeConfig(message controller.MessageFromAmi) string {
 	c := controller.Config{Programs: d.executeGetCoordination(),
-		Cards: controller.UploadDailyCards{Cards: make([]controller.DailyCard, 0)},
-		Weeks: controller.UploadWeekCards{Weeks: make([]controller.Week, 0)}}
+		Cards: make([]controller.DailyCard, 0),
+		Weeks: make([]controller.Week, 0)}
 	for _, v := range d.Cross.Arrays.WeekSets.WeekSets {
 		if !isWeekEmpty(v) {
-			c.Weeks.Weeks = append(c.Weeks.Weeks, controller.Week{Number: v.Number, DailyCards: v.Days})
+			c.Weeks = append(c.Weeks, controller.Week{Number: v.Number, DailyCards: v.Days})
 		}
 	}
 	for _, v := range d.Cross.Arrays.DaySets.DaySets {
@@ -50,7 +50,7 @@ func (d *Device) executeConfig(message controller.MessageFromAmi) string {
 					crd.Programs = append(crd.Programs, controller.Line{Number: l.PKNom, Hour: l.Hour, Minute: l.Min})
 				}
 			}
-			c.Cards.Cards = append(c.Cards.Cards, crd)
+			c.Cards = append(c.Cards, crd)
 		}
 	}
 	replay := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "Config", Body: "{}"}
