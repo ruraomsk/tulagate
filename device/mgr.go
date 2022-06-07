@@ -15,32 +15,29 @@ func (d *Device) insertMGR(message controller.MessageFromAmi) controller.Message
 		return message
 	}
 	size := len(setter.Phases)
-	// for i := 0; i < size; i++ {
-	// 	setter.Phases[i].Phase_order = setter.Phases[i].Phase_order * 10
-	// }
-	// sort.Slice(setter.Phases, func(i, j int) bool {
-	// 	return setter.Phases[i].Phase_order < setter.Phases[j].Phase_order
-	// })
 	phs := make([]controller.Phase, 0)
-	for i := 0; i < size; i++ {
-		if !setup.Set.MGRSet {
-			phs = append(phs, setter.Phases[i])
-			continue
+	if size != 0 {
+		for i := 0; i < size; i++ {
+			if !setup.Set.MGRSet {
+				phs = append(phs, setter.Phases[i])
+				continue
+			}
+			m, is := d.MGRS[setter.Phases[i].Number]
+			if !is {
+				phs = append(phs, setter.Phases[i])
+				continue
+			}
+			if setter.Phases[i].Duration > (m.TLen + m.TMGR) {
+				//Можно вставить МГР
+				nph := controller.Phase{Number: 0, Duration: m.TMGR}
+				setter.Phases[i].Duration = setter.Phases[i].Duration - m.TMGR
+				phs = append(phs, setter.Phases[i])
+				phs = append(phs, nph)
+			} else {
+				phs = append(phs, setter.Phases[i])
+			}
 		}
-		m, is := d.MGRS[setter.Phases[i].Number]
-		if !is {
-			phs = append(phs, setter.Phases[i])
-			continue
-		}
-		if setter.Phases[i].Duration > (m.TLen + m.TMGR) {
-			//Можно вставить МГР
-			nph := controller.Phase{Number: 0, Duration: m.TMGR}
-			setter.Phases[i].Duration = setter.Phases[i].Duration - m.TMGR
-			phs = append(phs, setter.Phases[i])
-			phs = append(phs, nph)
-		} else {
-			phs = append(phs, setter.Phases[i])
-		}
+
 	}
 	setter.Phases = phs
 	buffer, err := json.Marshal(setter)
@@ -49,5 +46,4 @@ func (d *Device) insertMGR(message controller.MessageFromAmi) controller.Message
 	}
 	result.Body = string(buffer)
 	return result
-
 }

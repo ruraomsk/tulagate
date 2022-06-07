@@ -160,6 +160,30 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 	for _, v := range setter.Phases {
 		tcycle += v.Duration
 	}
+	if tcycle == 0 {
+		for i, v := range d.Cross.Arrays.SetDK.DK {
+			if v.Pk == setter.Number {
+				d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
+				d.Cross.Arrays.SetDK.DK[i].Tc = tcycle
+				d.Cross.Arrays.SetDK.DK[i].Shift = setter.Offset
+				d.Cross.Arrays.SetDK.DK[i].TypePU = 0
+				if setter.Is_Coordination {
+					d.Cross.Arrays.SetDK.DK[i].TypePU = 1
+				}
+				// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
+
+				agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+				if setter.IsDefault {
+					db.SetBasePlan(d.Region, d.Cross.Arrays.SetDK, setter.Number)
+				}
+				return "ok"
+			}
+		}
+		err5 := fmt.Sprintf("%d нет такого плана в системе", setter.Number)
+		logger.Error.Printf(err5)
+		return err5
+
+	}
 	if setter.Offset >= tcycle {
 		err3 := fmt.Sprintf("смещение цикла не должно быть больше или равно времени цикла в %d программе", setter.Number)
 		logger.Error.Printf(err3)
@@ -247,6 +271,20 @@ func (d *Device) executeUploadWeekCards(message controller.MessageFromAmi) strin
 	if err != nil {
 		logger.Error.Println(err.Error())
 		return err.Error()
+	}
+	for _, v := range setter {
+		count := 0
+		if v.Number == 1 {
+			for _, wd := range v.DailyCards {
+				if wd != 0 {
+					count++
+				}
+			}
+			if count != 7 {
+				logger.Error.Println("В недельной карте 1 нельзя указывать нулевую суточную")
+				return "error!"
+			}
+		}
 	}
 	send := false
 	for _, v := range setter {

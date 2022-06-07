@@ -12,6 +12,9 @@ import (
 func (d *Device) executeGetCoordination() []controller.Programm {
 	result := make([]controller.Programm, 0)
 	for _, v := range d.Cross.Arrays.SetDK.DK {
+		if v.Tc <= 3 {
+			continue
+		}
 		plan := controller.Programm{Number: v.Pk, Offset: v.Shift, Phases: make([]controller.Phase, 0), Is_Coordination: false}
 		if v.TypePU == 1 {
 			plan.Is_Coordination = true
