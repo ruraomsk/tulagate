@@ -75,9 +75,9 @@ type Programm struct {
 }
 
 type Phase struct {
-	Number   int     `json:"number"`    // номер фазы
-	Duration int     `json:"duration"`  // общая длительность фазы, ключая длительность всех промтактов
-	TLGroups []Group `json:"tl_groups"` // массив групп светофоров
+	Number   int `json:"number"`   // номер фазы
+	Duration int `json:"duration"` // общая длительность фазы, ключая длительность всех промтактов
+	// TLGroups []Group `json:"tl_groups"` // массив групп светофоров
 }
 
 type Group struct {
