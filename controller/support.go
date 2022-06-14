@@ -19,6 +19,24 @@ func (c *DailyCard) ToDaySet(ds *binding.DaySets) error {
 		logger.Error.Printf(err.Error())
 		return err
 	}
+	if len(c.Programs) == 0 {
+		for i := 0; i < len(ds.DaySets); i++ {
+			if ds.DaySets[i].Number == r.Number {
+				ds.DaySets[i] = r
+				return nil
+			}
+		}
+		return nil
+	} else {
+		if c.Programs[0].Hour == 0 && c.Programs[0].Minute == 0 {
+			for i := 0; i < len(ds.DaySets); i++ {
+				if ds.DaySets[i].Number == r.Number {
+					ds.DaySets[i] = r
+					return nil
+				}
+			}
+		}
+	}
 	if c.Programs[0].Hour != 0 || c.Programs[0].Minute != 0 {
 		is24_00 := false
 		for _, v := range c.Programs {
@@ -41,6 +59,7 @@ func (c *DailyCard) ToDaySet(ds *binding.DaySets) error {
 	for i := 0; i < len(ds.DaySets); i++ {
 		if ds.DaySets[i].Number == r.Number {
 			ds.DaySets[i] = r
+			// logger.Debug.Println(ds.DaySets[i])
 			return nil
 		}
 	}
@@ -54,7 +73,7 @@ func (w *Week) ToWeekSet(dw *binding.WeekSets) error {
 		logger.Error.Printf(err.Error())
 		return err
 	}
-	if len(w.DailyCards) < 1 || len(w.DailyCards) > 12 {
+	if len(w.DailyCards) < 1 || len(w.DailyCards) > 7 {
 		err := fmt.Errorf("неверная длина недельной карты")
 		logger.Error.Println(err.Error())
 		return err

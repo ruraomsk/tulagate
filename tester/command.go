@@ -75,11 +75,23 @@ var pl1 = `{
 		}
 	]
 }`
+var upload = `
+[
+{"number":1,"programs":[{"number":1,"hour":24,"minute":0}]},
+{"number":2,"programs":[{"number":1,"hour":12,"minute":0},{"number":2,"hour":24,"minute":0}]},
+{"number":3,"programs":[{"number":1,"hour":24,"minute":0}]},
+{"number":4,"programs":[{"number":1,"hour":24,"minute":0}]},
+{"number":5,"programs":[{"number":1,"hour":24,"minute":0}]}
+]
+`
 
 func cycle() {
 	time.Sleep(3 * time.Second)
-	senderCommand("device3", "GetCoordination", "")
-	senderCommand("device5", "GetCoordination", "")
+	senderCommand("device3", "UploadDailyCards", upload)
+	senderCommand("device5", "UploadDailyCards", upload)
+
+	senderCommand("device3", "Config", "")
+	senderCommand("device5", "Config", "")
 
 	senderCommand("device3", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
 	senderCommand("device5", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
@@ -116,14 +128,14 @@ func cycle() {
 func TestCommand() {
 	for {
 		time.Sleep(2 * time.Second)
-		senderCommand("device3", "UploadPrograms", pl)
-		senderCommand("device5", "UploadPrograms", pl)
-		time.Sleep(10 * time.Second)
+		// senderCommand("device3", "UploadPrograms", pl)
+		// senderCommand("device5", "UploadPrograms", pl)
+		// time.Sleep(10 * time.Second)
 		cycle()
-		senderCommand("device3", "UploadPrograms", pl1)
-		senderCommand("device5", "UploadPrograms", pl1)
-		time.Sleep(10 * time.Second)
-		cycle()
+		// senderCommand("device3", "UploadPrograms", pl1)
+		// senderCommand("device5", "UploadPrograms", pl1)
+		// time.Sleep(10 * time.Second)
+		// cycle()
 	}
 
 }

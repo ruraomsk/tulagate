@@ -130,6 +130,7 @@ func ClearPKs(cross *pudge.Cross) {
 	cross.Arrays.DaySets = *binding.NewDaySet()
 	cross.Arrays.DaySets.DaySets[0].Count = 1
 	cross.Arrays.DaySets.DaySets[0].Number = 1
+
 	cross.Arrays.DaySets.DaySets[0].Lines[0].Hour = 24
 	cross.Arrays.DaySets.DaySets[0].Lines[0].Min = 0
 	cross.Arrays.DaySets.DaySets[0].Lines[0].PKNom = 1

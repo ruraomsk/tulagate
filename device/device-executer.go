@@ -253,6 +253,7 @@ func (d *Device) executeUploadDailyCards(message controller.MessageFromAmi) stri
 		return err.Error()
 	}
 	send := false
+	// logger.Debug.Println(setter)
 	for _, v := range setter {
 		send = true
 		err := v.ToDaySet(&d.Cross.Arrays.DaySets)
