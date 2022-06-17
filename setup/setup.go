@@ -15,6 +15,7 @@ type Setup struct {
 	TimeKeepAliveAmi  int      `toml:"keepalive"`
 	MGRSet            bool     `toml:"mgrset"`
 	TimeKeepStatistic int      `toml:"timestat"` //Интервал времени отстутствия статистики
+	Test              bool     `toml:"test"`
 }
 
 //DataBase настройки базы данных postresql

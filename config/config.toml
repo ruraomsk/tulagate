@@ -6,6 +6,7 @@
 	keepalive=300
 	mgrset=false					#использовать ли МГР?
 	timestat=10
+	test=false
 [dataBase]
 	host= "192.168.115.25"
 	port= 5432

@@ -1,6 +1,11 @@
 {
     "dkset": [
         {
+            "idext": "C12Stend",
+            "area": 1,
+            "id": 6
+        },
+        {
             "idext": "device3",
             "area": 1,
             "id": 7

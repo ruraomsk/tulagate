@@ -37,11 +37,11 @@ func (d *Device) worker() {
 		if setup.Set.MGRSet {
 			//есть МГР
 			d.LastMGR = 1
-			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
+			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
 		} else {
 			//нет МГР
 			d.LastMGR = 0
-			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
 		}
 	}
 	d.executeStartWork()
@@ -108,13 +108,13 @@ func (d *Device) worker() {
 				if time.Since(d.LastReciveStat) > time.Duration(setup.Set.TimeKeepStatistic)*time.Second {
 					//нет МГР
 					if d.LastMGR == 1 {
-						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
 						d.LastMGR = 0
 					}
 				} else {
 					//есть МГР
 					if d.LastMGR == 0 {
-						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
+						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
 						d.LastMGR = 1
 					}
 				}

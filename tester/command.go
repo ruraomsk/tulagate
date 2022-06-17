@@ -52,11 +52,11 @@ var pl = `{
 			"duration":20
 		},
 		{
-			"number":1,
+			"number":3,
 			"duration":30
 		},
 		{
-			"number":2,
+			"number":4,
 			"duration":30
 		}
 	]
@@ -87,55 +87,45 @@ var upload = `
 
 func cycle() {
 	time.Sleep(3 * time.Second)
-	senderCommand("device3", "UploadDailyCards", upload)
-	senderCommand("device5", "UploadDailyCards", upload)
+	senderCommand("C12Stend", "UploadDailyCards", upload)
 
-	senderCommand("device3", "Config", "")
-	senderCommand("device5", "Config", "")
+	senderCommand("C12Stend", "Config", "")
 
-	senderCommand("device3", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
-	senderCommand("device5", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
+	senderCommand("C12Stend", "HoldPhase", `{"phase_number":1,"max_duration":30,"unhold_phase":true}`)
 	time.Sleep(30 * time.Second)
 
-	senderCommand("device3", "HoldPhase", `{"phase_number":2,"max_duration":30,"unhold_phase":true}`)
-	senderCommand("device5", "HoldPhase", `{"phase_number":2,"max_duration":30,"unhold_phase":true}`)
+	senderCommand("C12Stend", "HoldPhase", `{"phase_number":2,"max_duration":30,"unhold_phase":true}`)
 	time.Sleep(30 * time.Second)
 
-	senderCommand("device3", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
-	senderCommand("device5", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
+	senderCommand("C12Stend", "SwitchProgram", `{"program_number":1,"switch_default":true}`)
 
 	time.Sleep(30 * time.Second)
-	senderCommand("device3", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
-	senderCommand("device5", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
+	senderCommand("C12Stend", "SwitchProgram", `{"program_number":2,"switch_default":true}`)
 	time.Sleep(30 * time.Second)
-	senderCommand("device3", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
-	senderCommand("device5", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
+	senderCommand("C12Stend", "SwitchProgram", `{"program_number":0,"switch_default":false}`)
 	time.Sleep(60 * time.Second)
 
-	senderCommand("device3", "SetMode", `{"mode":3,"is_enabled":true}`)
-	senderCommand("device5", "SetMode", `{"mode":3,"is_enabled":true}`)
+	senderCommand("C12Stend", "SetMode", `{"mode":3,"is_enabled":true}`)
 	time.Sleep(10 * time.Second)
 
-	senderCommand("device3", "SetMode", `{"mode":5,"is_enabled":true}`)
-	senderCommand("device5", "SetMode", `{"mode":5,"is_enabled":true}`)
+	senderCommand("C12Stend", "SetMode", `{"mode":5,"is_enabled":true}`)
 	time.Sleep(10 * time.Second)
 
-	senderCommand("device3", "SetMode", `{"mode":0,"is_enabled":false}`)
-	senderCommand("device5", "SetMode", `{"mode":0,"is_enabled":false}`)
+	senderCommand("C12Stend", "SetMode", `{"mode":0,"is_enabled":false}`)
 	time.Sleep(10 * time.Second)
 
 }
 func TestCommand() {
 	for {
 		time.Sleep(2 * time.Second)
-		// senderCommand("device3", "UploadPrograms", pl)
+		senderCommand("C12Stend", "UploadPrograms", pl)
 		// senderCommand("device5", "UploadPrograms", pl)
-		// time.Sleep(10 * time.Second)
+		time.Sleep(10 * time.Second)
 		cycle()
-		// senderCommand("device3", "UploadPrograms", pl1)
+		senderCommand("C12Stend", "UploadPrograms", pl1)
 		// senderCommand("device5", "UploadPrograms", pl1)
-		// time.Sleep(10 * time.Second)
-		// cycle()
+		time.Sleep(10 * time.Second)
+		cycle()
 	}
 
 }

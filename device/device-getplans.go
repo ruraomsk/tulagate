@@ -16,7 +16,7 @@ func (d *Device) executeGetCoordination() []controller.Programm {
 			continue
 		}
 		plan := controller.Programm{Number: v.Pk, Offset: v.Shift, Phases: make([]controller.Phase, 0), Is_Coordination: false}
-		if v.TypePU == 1 {
+		if v.TypePU == 0 {
 			plan.Is_Coordination = true
 		}
 		phase := controller.Phase{}

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ruraomsk/tulagate/controller"
+	"github.com/ruraomsk/tulagate/setup"
 )
 
 func Maker() {
@@ -15,12 +16,15 @@ func Maker() {
 
 	for {
 		<-tickOneSecond.C
-		s := controller.ChanelStat{}
-		for i := 0; i < len(s.Chanels); i++ {
-			s.Chanels[i] = rand.Intn(3)
+		if setup.Set.MGRSet {
+			s := controller.ChanelStat{}
+			for i := 0; i < len(s.Chanels); i++ {
+				s.Chanels[i] = rand.Intn(3)
+			}
+			buff, _ := json.Marshal(s)
+			// senderCommand("device3", "ChanelStat", string(buff))
+			// senderCommand("device5", "ChanelStat", string(buff))
+			senderCommand("C12Stend", "ChanelStat", string(buff))
 		}
-		buff, _ := json.Marshal(s)
-		senderCommand("device3", "ChanelStat", string(buff))
-		senderCommand("device5", "ChanelStat", string(buff))
 	}
 }
