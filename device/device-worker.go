@@ -32,7 +32,7 @@ func (d *Device) worker() {
 	logger.Info.Printf("Откатились на базовое состояние %v", d.Cross.IDevice)
 	tickSFDK := time.NewTicker(time.Minute)
 	tickOneSecond := time.NewTicker(time.Second)
-
+	sendStatus := time.Duration(60 * time.Second)
 	if d.Ctrl.IsConnected() {
 		if setup.Set.MGRSet {
 			//есть МГР
@@ -90,7 +90,7 @@ func (d *Device) worker() {
 					}
 				}
 			}
-			if time.Since(d.LastSendStatus) > time.Minute {
+			if time.Since(d.LastSendStatus) > sendStatus {
 				uptransport.SendToAmiChan <- d.sendStatus()
 			}
 			d.loadData()
