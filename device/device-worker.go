@@ -204,6 +204,9 @@ func (d *Device) sendNotTransport() {
 func (d *Device) sendStatus() controller.MessageToAmi {
 	message := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "status", Body: "{}"}
 	status := controller.Status{Program_number: d.Cross.PK, Phase_number: d.DK.FDK, Has_Default_Programs: make([]int, 0), Has_Loaded_Programs: make([]int, 0)}
+	if status.Phase_number > 8 {
+		status.Phase_number = 0
+	}
 	if d.DK.FDK == 9 {
 		status.Tact_number = 1
 		status.Phase_number = d.DK.FTUDK

@@ -35,15 +35,20 @@ func (d *Device) sendReplayToAmiWithStatus(message string) {
 }
 func (d *Device) executeSetMode(message controller.MessageFromAmi) string {
 	var setter controller.SetMode
+	var err1 = "device offline"
+	var err2 = "device out of control"
 	if !d.Ctrl.IsConnected() {
 		d.offMessage()
-		return "device offline"
+		logger.Error.Println(err1)
+		return err1
 	}
 	if !db.GetControlStatus(d.Cross.StatusDevice) {
-		return "device out of control"
+		logger.Error.Println(err2)
+		return err2
 	}
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
+		logger.Error.Println(err.Error())
 		return err.Error()
 	}
 	if !setter.Is_enabled {
@@ -62,15 +67,20 @@ func (d *Device) executeSetMode(message controller.MessageFromAmi) string {
 }
 func (d *Device) executeHoldPhase(message controller.MessageFromAmi) string {
 	var setter controller.HoldPhase
+	var err1 = "device offline"
+	var err2 = "device out of control"
 	if !d.Ctrl.IsConnected() {
 		d.offMessage()
-		return "device offline"
+		logger.Error.Println(err1)
+		return err1
 	}
 	if !db.GetControlStatus(d.Cross.StatusDevice) {
-		return "device out of control"
+		logger.Error.Println(err2)
+		return err2
 	}
 	err := json.Unmarshal([]byte(message.Body), &setter)
 	if err != nil {
+		logger.Error.Println(err.Error())
 		return err.Error()
 	}
 	if !setter.Unhold_phase {
