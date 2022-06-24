@@ -117,10 +117,12 @@ func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string 
 		return err.Error()
 	}
 	if !setter.Switch_default {
+		d.isDUPK = false
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: 0}
 		return "ok"
 	}
 	if setter.Programm_number > 0 && setter.Programm_number <= 12 {
+		d.isDUPK = true
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: setter.Programm_number}
 		return "ok"
 	}

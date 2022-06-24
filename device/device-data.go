@@ -33,6 +33,7 @@ type Device struct {
 	MGRS           map[int]binding.MGR
 	Stat           statistic
 	LastMGR        int
+	isDUPK         bool //true если задан режин ДУ ПК
 }
 type statistic struct {
 	tp       int

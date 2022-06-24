@@ -26,6 +26,7 @@ func (d *Device) worker() {
 		time.Sleep(time.Second)
 	}
 	d.loadData()
+	d.isDUPK = false
 	baseCross, _ := db.GetStartCross(d.Region)
 	db.MoveData(&d.Cross, &baseCross)
 	agtransport.SendCross <- pudge.UserCross{State: d.Cross}
@@ -53,6 +54,7 @@ func (d *Device) worker() {
 			d.loadData()
 			baseCross, _ := db.GetStartCross(d.Region)
 			db.MoveData(&d.Cross, &baseCross)
+			d.isDUPK = false
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}
 			logger.Info.Printf("Откатились по разрыву связи с верхом %v", d.Cross.IDevice)
 			if d.Ctrl.IsConnected() {
@@ -268,8 +270,6 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 	}
 	status.Errors.Sw_error = d.ErrorTech
 	status.Errors.Is_door_opened = d.Ctrl.DK.ODK
-	status.Channels_state = make([]controller.Channels_state, 0)
-	status.Channels_powers = make([]float64, 0)
 	status.Mode = 0
 	switch d.DK.RDK {
 	case 1:
@@ -293,6 +293,9 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 	default:
 		logger.Error.Printf("rdk=%d нужна перекодировка!", d.DK.RDK)
 	}
+	if status.Mode == 2 && d.isDUPK {
+		status.Mode = 8
+	}
 	switch d.DK.FDK {
 	case 10:
 		status.Mode = 3
@@ -309,6 +312,7 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 			logger.Error.Printf("fdk=%d нужна перекодировка!", d.DK.FDK)
 		}
 	}
+	// logger.Debug.Printf("%v rdk=%d fdk=%d mode=%d", d.Region, d.DK.RDK, d.DK.FDK, status.Mode)
 	status.Has_Default_Programs = db.LoadBaseProgramm(d.Region)
 	status.Has_Loaded_Programs = make([]int, 0)
 	for _, v := range d.Cross.Arrays.SetDK.DK {
