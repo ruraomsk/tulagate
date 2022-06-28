@@ -29,7 +29,9 @@ func (d *Device) stop() {
 }
 func (d *Device) sendReplayToAmiWithStatus(message string) {
 	d.ErrorTech = make([]string, 0)
-	d.ErrorTech = append(d.ErrorTech, message)
+	if len(message) != 0 {
+		d.ErrorTech = append(d.ErrorTech, message)
+	}
 	uptransport.SendToAmiChan <- d.sendStatus()
 	d.ErrorTech = make([]string, 0)
 }
@@ -53,15 +55,15 @@ func (d *Device) executeSetMode(message controller.MessageFromAmi) string {
 	}
 	if !setter.Is_enabled {
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 9}
-		return "ok"
+		return ""
 	}
 	switch setter.Mode {
 	case 3:
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 0x0a}
-		return "ok"
+		return ""
 	case 5:
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 0x0b}
-		return "ok"
+		return ""
 	}
 	return fmt.Sprintf("unsupported %d set mode", setter.Mode)
 }
@@ -89,14 +91,14 @@ func (d *Device) executeHoldPhase(message controller.MessageFromAmi) string {
 		d.HoldPhase.Unhold_phase = false
 		d.CountHoldPhase = 0
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: 9}
-		return "ok"
+		return ""
 	}
 	d.HoldPhase.Max_duration = setter.Max_duration
 	d.HoldPhase.Phase_number = setter.Phase_number
 	d.HoldPhase.Unhold_phase = true
 	d.CountHoldPhase = 0
 	agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 9, Params: setter.Phase_number}
-	return "ok"
+	return ""
 }
 
 func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string {
@@ -119,12 +121,12 @@ func (d *Device) executeSwitchProgram(message controller.MessageFromAmi) string 
 	if !setter.Switch_default {
 		d.isDUPK = false
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: 0}
-		return "ok"
+		return ""
 	}
 	if setter.Programm_number > 0 && setter.Programm_number <= 12 {
 		d.isDUPK = true
 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 5, Params: setter.Programm_number}
-		return "ok"
+		return ""
 	}
 	err3 := fmt.Sprintf("unsupported %d programm", setter.Programm_number)
 	logger.Error.Printf(err3)
@@ -158,7 +160,7 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 	// 				d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
 	// 				d.Cross.Arrays.SetDK.DK[i].Tc = 0 //Локальный режим
 	// 				agtransport.SendCross <- pudge.UserCross{State: d.Cross}
-	// 				return "ok"
+	// 				return ""
 	// 			}
 	// 		}
 	// 	}
@@ -188,7 +190,7 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 				if setter.IsDefault {
 					db.SetBasePlan(d.Region, d.Cross.Arrays.SetDK, setter.Number)
 				}
-				return "ok"
+				return ""
 			}
 		}
 		err5 := fmt.Sprintf("%d нет такого плана в системе", setter.Number)
@@ -244,7 +246,7 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 			if setter.IsDefault {
 				db.SetBasePlan(d.Region, d.Cross.Arrays.SetDK, setter.Number)
 			}
-			return "ok"
+			return ""
 		}
 	}
 	err5 := fmt.Sprintf("%d нет такого плана в системе", setter.Number)
@@ -276,7 +278,7 @@ func (d *Device) executeUploadDailyCards(message controller.MessageFromAmi) stri
 	if send {
 		agtransport.SendCross <- pudge.UserCross{State: d.Cross}
 	}
-	return "ok"
+	return ""
 }
 func (d *Device) executeUploadWeekCards(message controller.MessageFromAmi) string {
 	var setter []controller.Week
@@ -310,5 +312,5 @@ func (d *Device) executeUploadWeekCards(message controller.MessageFromAmi) strin
 	if send {
 		agtransport.SendCross <- pudge.UserCross{State: d.Cross}
 	}
-	return "ok"
+	return ""
 }

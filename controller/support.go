@@ -45,7 +45,7 @@ func (c *DailyCard) ToDaySet(ds *binding.DaySets) error {
 			}
 		}
 		if !is24_00 {
-			err := fmt.Errorf("неверное завершение суточной карты")
+			err := fmt.Errorf("неверное завершение суточной карты %d", c.Number)
 			logger.Error.Printf(err.Error())
 			return err
 		}
@@ -74,7 +74,7 @@ func (w *Week) ToWeekSet(dw *binding.WeekSets) error {
 		return err
 	}
 	if len(w.DailyCards) < 1 || len(w.DailyCards) > 7 {
-		err := fmt.Errorf("неверная длина недельной карты")
+		err := fmt.Errorf("неверная длина недельной карты %d", w.Number)
 		logger.Error.Println(err.Error())
 		return err
 
