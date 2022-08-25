@@ -26,6 +26,7 @@ var timeKeepAliveAmi time.Duration
 // var stream proto.AMI_RunClient //= amiClient.Run(ctx)
 
 func Starter() {
+	count := 0
 	SendToAmiChan = make(chan controller.MessageToAmi, 1000)
 	internalSendToAmiChan = make(chan controller.MessageToAmi, 1000)
 	DebugStopAmi = make(chan interface{})
@@ -36,19 +37,22 @@ func Starter() {
 	grpcURL := fmt.Sprintf("%s:%d", setup.Set.RemoteHost, setup.Set.RemotePort)
 	// grpcConn, err := grpc.Dial(grpcURL, grpc.WithInsecure(), grpc.WithBlock())
 	for {
-		ctx1, _ := context.WithTimeout(context.Background(), time.Second*5)
+		ctx1, _ := context.WithTimeout(context.Background(), time.Second*60)
 		grpcConn, err := grpc.DialContext(ctx1, grpcURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			logger.Error.Panicf("процедура подключения к gRPC завершена с ошибкой: %s", err.Error())
 			time.Sleep(time.Second)
 			continue
 		}
-		logger.Info.Println("gRPC активно")
+		// logger.Info.Println("gRPC активно")
 		amiClient := proto.NewAMIClient(grpcConn)
 		ctx := metadata.NewOutgoingContext(context.Background(), metadata.Pairs("protocol", "dkst"))
 		stream, err := amiClient.Run(ctx)
 		if err != nil {
-			logger.Error.Print(err.Error())
+			if count%100 == 0 {
+				logger.Error.Print(err.Error())
+			}
+			count++
 			grpcConn.Close()
 			time.Sleep(5 * time.Second)
 			continue
@@ -56,6 +60,7 @@ func Starter() {
 
 		workAmi = true
 		logger.Info.Println("Связь есть с верхом")
+		count = 0
 		go SendToAmi(stream)
 		for {
 			recv, err := stream.Recv()

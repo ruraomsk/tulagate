@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"runtime"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -93,7 +94,11 @@ func main() {
 	}
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, os.Interrupt,
+		syscall.SIGQUIT,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGHUP)
 loop:
 	for {
 		<-c

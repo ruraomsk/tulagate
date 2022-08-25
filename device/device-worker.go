@@ -158,18 +158,18 @@ func (d *Device) worker() {
 			case "UploadPrograms":
 				message = d.insertMGR(message)
 				// d.sendReplayToAmi(d.executeUploadPrograms(message))
-				d.executeUploadPrograms(message)
+				d.sendReplayToAmiWithStatus(d.executeUploadPrograms(message))
 			case "GetCoordination":
 				d.loadData()
 				d.executeGetCoordination()
 			case "ChanelStat":
 				d.executeAddStat(message)
 			case "UploadDailyCards":
-				d.executeUploadDailyCards(message)
+				d.sendReplayToAmiWithStatus(d.executeUploadDailyCards(message))
 			case "UploadWeekCards":
-				d.executeUploadWeekCards(message)
+				d.sendReplayToAmiWithStatus(d.executeUploadWeekCards(message))
 			case "Config":
-				d.executeConfig(message)
+				d.sendReplayToAmiWithStatus(d.executeConfig(message))
 			default:
 				s := fmt.Sprintf("%s not supported", message.Action)
 				logger.Error.Printf(s)
