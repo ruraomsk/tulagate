@@ -1,19 +1,29 @@
 {
     "dkset": [
         {
-            "idext": "C12Stend",
+            "idext": "C12D1",
             "area": 1,
-            "id": 8
+            "id": 1
         },
         {
-            "idext": "device3",
+            "idext": "C12D2",
             "area": 1,
-            "id": 7
+            "id": 2
         },
         {
-            "idext": "device5",
+            "idext": "C12D3",
             "area": 1,
-            "id": 11
+            "id": 3
+        },
+        {
+            "idext": "C12D4",
+            "area": 1,
+            "id": 4
+        },
+        {
+            "idext": "C12D5",
+            "area": 1,
+            "id": 5
         }
     ]
 }

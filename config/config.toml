@@ -1,21 +1,21 @@
 	logpath="log/"
-	remoteHost = "89.20.134.2"
+	remoteHost = "195.91.197.196"
 	remotePort = 34222
 	myname="tulagate"
-	region=1
+	region=11
 	keepalive=300
 	mgrset=false					#использовать ли МГР?
 	timestat=10
 	test=false
 [dataBase]
-	host= "192.168.115.25"
+	host= "192.168.115.23"
 	port= 5432
 	user= "postgres"
 	password= "162747"
 	dbname= "agserv"
 	step=5
 [agserver]
-	host= "192.168.115.25"
+	host= "192.168.115.23"
 	portc= 2001					#Порт приема команд от сервера АРМ
 	porta= 2002					#Порт приема массивов привязки от сервера АРМ
     portd= 2004                 #Порт передачи фазы и времени серверу АРМ
