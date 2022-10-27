@@ -1,29 +1,79 @@
 {
     "dkset": [
         {
-            "idext": "C12D1",
+            "idext": "C1201",
             "area": 1,
             "id": 1
         },
         {
-            "idext": "C12D2",
+            "idext": "C1202",
             "area": 1,
             "id": 2
         },
         {
-            "idext": "C12D3",
+            "idext": "C1203",
             "area": 1,
             "id": 3
         },
         {
-            "idext": "C12D4",
+            "idext": "C1204",
             "area": 1,
             "id": 4
         },
         {
-            "idext": "C12D5",
+            "idext": "C1205",
             "area": 1,
             "id": 5
+        },
+        {
+            "idext": "C1206",
+            "area": 1,
+            "id": 6
+        },
+        {
+            "idext": "C1210",
+            "area": 1,
+            "id": 10
+        },
+        {
+            "idext": "C1221",
+            "area": 1,
+            "id": 21
+        },
+        {
+            "idext": "C1222",
+            "area": 1,
+            "id": 22
+        },
+        {
+            "idext": "C1223",
+            "area": 1,
+            "id": 23
+        },
+        {
+            "idext": "C1225",
+            "area": 1,
+            "id": 25
+        },
+        {
+            "idext": "C1241",
+            "area": 1,
+            "id": 41
+        },
+        {
+            "idext": "C1242",
+            "area": 1,
+            "id": 42
+        },
+        {
+            "idext": "C1251",
+            "area": 1,
+            "id": 51
+        },
+        {
+            "idext": "C1252",
+            "area": 1,
+            "id": 52
         }
     ]
 }

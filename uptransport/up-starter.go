@@ -40,7 +40,7 @@ func Starter() {
 		ctx1, _ := context.WithTimeout(context.Background(), time.Second*60)
 		grpcConn, err := grpc.DialContext(ctx1, grpcURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
-			logger.Error.Panicf("процедура подключения к gRPC завершена с ошибкой: %s", err.Error())
+			logger.Error.Printf("процедура подключения к gRPC завершена с ошибкой: %s", err.Error())
 			time.Sleep(time.Second)
 			continue
 		}
