@@ -216,9 +216,9 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 			d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
 			d.Cross.Arrays.SetDK.DK[i].Tc = tcycle
 			d.Cross.Arrays.SetDK.DK[i].Shift = setter.Offset
-			d.Cross.Arrays.SetDK.DK[i].TypePU = 0
+			d.Cross.Arrays.SetDK.DK[i].TypePU = 1
 			if setter.Is_Coordination {
-				d.Cross.Arrays.SetDK.DK[i].TypePU = 1
+				d.Cross.Arrays.SetDK.DK[i].TypePU = 0
 			}
 			tnow := setter.Offset
 			for j, v := range setter.Phases {

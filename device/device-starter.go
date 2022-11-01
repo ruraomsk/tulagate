@@ -18,6 +18,9 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 	devices = make(map[pudge.Region]Device)
 
 	for _, v := range dks.DKSets {
+		if !v.Work {
+			continue
+		}
 		region := pudge.Region{Region: setup.Set.Region, Area: v.Area, ID: v.ID}
 		device := Device{OneSet: v, Region: region, DevPhases: make(chan comm.DevPhases),
 			MessageForMe: make(chan controller.MessageFromAmi, 10), ErrorTech: make([]string, 0), LastSendStatus: time.Now(),

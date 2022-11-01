@@ -18,4 +18,5 @@ type OneSet struct {
 	IDExternal string `json:"idext"` //Их ID
 	Area       int    `json:"area"`  //Наш Перекресток
 	ID         int    `json:"id"`
+	Work       bool   `json:"work"` //true если необходмо включить
 }

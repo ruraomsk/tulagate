@@ -1,6 +1,8 @@
 	logpath="log/"
-	remoteHost = "195.91.197.196"
-	remotePort = 34222
+	# remoteHost = "195.91.197.196"
+	# remotePort = 34222
+	remoteHost = "10.151.50.123"
+	remotePort = 20771
 	myname="tulagate"
 	region=11
 	keepalive=300
