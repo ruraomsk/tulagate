@@ -312,6 +312,9 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 			logger.Error.Printf("fdk=%d нужна перекодировка!", d.DK.FDK)
 		}
 	}
+	if d.DK.FTUDK == 0 {
+		status.Mode = 1
+	}
 	// logger.Debug.Printf("%v rdk=%d fdk=%d mode=%d", d.Region, d.DK.RDK, d.DK.FDK, status.Mode)
 	status.Has_Default_Programs = db.LoadBaseProgramm(d.Region)
 	status.Has_Loaded_Programs = make([]int, 0)

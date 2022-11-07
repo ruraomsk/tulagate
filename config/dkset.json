@@ -7,67 +7,79 @@
         },
         {
             "idext": "C1202",
+            "work": true,
             "area": 1,
             "id": 2
         },
         {
             "idext": "C1203",
+            "work": true,
             "area": 1,
             "id": 3
         },
         {
             "idext": "C1204",
+            "work": true,
             "area": 1,
             "id": 4
         },
         {
             "idext": "C1205",
+            "work": true,
             "area": 1,
             "id": 5
         },
         {
             "idext": "C1206",
+            "work": true,
             "area": 1,
             "id": 6
         },
         {
             "idext": "C1210",
+            "work": true,
             "area": 1,
             "id": 10
         },
         {
             "idext": "C1221",
+            "work": true,
             "area": 1,
             "id": 21
         },
         {
             "idext": "C1222",
-            "work":true,
+            "work": true,
             "area": 1,
             "id": 22
         },
         {
             "idext": "C1223",
+            "work": true,
             "area": 1,
             "id": 23
         },
         {
             "idext": "C1225",
+            "work": true,
             "area": 1,
             "id": 25
         },
         {
             "idext": "C1241",
+            "work": true,
             "area": 1,
             "id": 41
         },
         {
             "idext": "C1242",
+            "work": true,
             "area": 1,
             "id": 42
         },
         {
             "idext": "C1251",
+            "work": true,
             "area": 1,
             "id": 51
         },

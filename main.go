@@ -94,11 +94,19 @@ func main() {
 	}
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt,
-		syscall.SIGQUIT,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		syscall.SIGHUP)
+	if strings.Contains(runtime.GOOS, "linux") {
+		signal.Notify(c, os.Interrupt,
+			syscall.SIGQUIT,
+			syscall.SIGINT,
+			syscall.SIGTERM)
+
+	} else {
+		signal.Notify(c, os.Interrupt,
+			syscall.SIGQUIT,
+			syscall.SIGINT,
+			syscall.SIGTERM,
+			syscall.SIGHUP)
+	}
 loop:
 	for {
 		<-c
