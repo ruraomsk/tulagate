@@ -32,7 +32,14 @@ func (d *Device) executeGetCoordination() []controller.Programm {
 				// logger.Debug.Print(plan.Phases)
 				continue
 			}
-			phase = controller.Phase{Duration: ph.Stop - ph.Start + ph.Dt, Number: ph.Number}
+			tf := 0
+			if ph.Tf == 2 {
+				tf = 1
+			}
+			if ph.Tf == 5 {
+				tf = 2
+			}
+			phase = controller.Phase{Duration: ph.Stop - ph.Start + ph.Dt, Number: ph.Number, Type: tf}
 			plan.Phases = append(plan.Phases, phase)
 		}
 		result = append(result, plan)

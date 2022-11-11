@@ -2,6 +2,7 @@
     "dkset": [
         {
             "idext": "C1201",
+            "work": true,
             "area": 1,
             "id": 1
         },
@@ -85,6 +86,7 @@
         },
         {
             "idext": "C1252",
+            "work": true,
             "area": 1,
             "id": 52
         }

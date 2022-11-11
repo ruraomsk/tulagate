@@ -226,7 +226,13 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 				if v.Number == 0 {
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 1
 				} else {
-					d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 0
+					if v.Type == 0 {
+						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 0
+					} else if v.Type == 1 {
+						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 2
+					} else if v.Type == 2 {
+						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 5
+					}
 				}
 				d.Cross.Arrays.SetDK.DK[i].Stages[j].Number = v.Number
 				if tnow+v.Duration >= tcycle {
@@ -238,6 +244,9 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 				} else {
 					tnow += v.Duration
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tnow
+					if v.Type == 2 {
+						tnow -= v.Duration
+					}
 				}
 			}
 			// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
