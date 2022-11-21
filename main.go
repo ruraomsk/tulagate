@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"runtime"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -95,17 +94,19 @@ func main() {
 
 	c := make(chan os.Signal, 1)
 	if strings.Contains(runtime.GOOS, "linux") {
-		signal.Notify(c, os.Interrupt,
-			syscall.SIGQUIT,
-			syscall.SIGINT,
-			syscall.SIGTERM)
+		signal.Notify(c, os.Interrupt)
+		// ,
+		// 	syscall.SIGQUIT,
+		// 	syscall.SIGINT,
+		// 	syscall.SIGTERM)
 
 	} else {
-		signal.Notify(c, os.Interrupt,
-			syscall.SIGQUIT,
-			syscall.SIGINT,
-			syscall.SIGTERM,
-			syscall.SIGHUP)
+		signal.Notify(c, os.Interrupt)
+		// ,
+		// 	syscall.SIGQUIT,
+		// 	syscall.SIGINT,
+		// 	syscall.SIGTERM,
+		// 	syscall.SIGHUP)
 	}
 loop:
 	for {
