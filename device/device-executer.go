@@ -147,10 +147,37 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 		logger.Error.Printf(err1)
 		return err1
 	}
+	if setter.Mode != 0 {
+		for i, v := range d.Cross.Arrays.SetDK.DK {
+			if v.Pk == setter.Number {
+				d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
+				d.Cross.Arrays.SetDK.DK[i].Tc = setter.Mode
+				d.Cross.Arrays.SetDK.DK[i].Shift = setter.Offset
+				d.Cross.Arrays.SetDK.DK[i].TypePU = 1
+				if setter.Is_Coordination {
+					d.Cross.Arrays.SetDK.DK[i].TypePU = 0
+				}
+				// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
+
+				agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+				if setter.IsDefault {
+					db.SetBasePlan(d.Region, d.Cross.Arrays.SetDK, setter.Number)
+				}
+				return ""
+			}
+		}
+		err5 := fmt.Sprintf("%d нет такого плана в системе", setter.Number)
+		logger.Error.Printf(err5)
+		return err5
+
+	}
 	if len(setter.Phases) > 12 {
 		err2 := fmt.Sprintf("слишком много фаз в %d  не больше 12", setter.Number)
 		logger.Error.Printf(err2)
 		return err2
+	}
+	if setter.Mode != 0 {
+
 	}
 	// if !setter.IsEnabled {
 	// 	//Удаляем план создаем в нем ЛР

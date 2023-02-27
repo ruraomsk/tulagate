@@ -57,6 +57,7 @@ type Programm struct {
 	Offset          int     `json:"offset"`          // смещение прогрммы (скорее всего тут это не нужно, так как для каждого плана координации смещение будет свое)
 	Is_Coordination bool    `json:"is_coordination"` //True если ПК иначе ЛР
 	IsDefault       bool    `json:"is_default"`      // признак того, используется прогрмма по умолчанию или нет
+	Mode            int     `json:"mode"`            // 0 обычная программа 1 ЖМ 2 ОС
 	Phases          []Phase `json:"phases"`          // массив фаз
 }
 
