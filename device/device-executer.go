@@ -199,7 +199,9 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 	//считаем время цикла
 	tcycle := 0
 	for _, v := range setter.Phases {
-		tcycle += v.Duration
+		if v.Type != 2 {
+			tcycle += v.Duration
+		}
 	}
 	if tcycle == 0 {
 		for i, v := range d.Cross.Arrays.SetDK.DK {
@@ -258,7 +260,7 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 					} else if v.Type == 1 {
 						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 2
 					} else if v.Type == 2 {
-						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 5
+						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 7
 					}
 				}
 				d.Cross.Arrays.SetDK.DK[i].Stages[j].Number = v.Number
@@ -276,6 +278,7 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 					}
 				}
 			}
+
 			// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
 
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}

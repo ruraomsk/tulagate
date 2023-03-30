@@ -39,7 +39,8 @@ func (d *Device) executeGetCoordination() []controller.Programm {
 			if ph.Tf == 2 {
 				tf = 1
 			}
-			if ph.Tf == 5 {
+			if ph.Tf == 7 || ph.Tf == 5 || ph.Tf == 6 {
+				// logger.Debug.Printf("ph.Tf==%d", ph.Tf)
 				tf = 2
 			}
 			phase = controller.Phase{Duration: ph.Stop - ph.Start + ph.Dt, Number: ph.Number, Type: tf}

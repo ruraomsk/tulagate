@@ -156,7 +156,7 @@ func (d *Device) worker() {
 			case "SwitchProgram":
 				d.sendReplayToAmiWithStatus(d.executeSwitchProgram(message))
 			case "UploadPrograms":
-				message = d.insertMGR(message)
+				// message = d.insertMGR(message)
 				// d.sendReplayToAmi(d.executeUploadPrograms(message))
 				d.sendReplayToAmiWithStatus(d.executeUploadPrograms(message))
 			case "GetCoordination":

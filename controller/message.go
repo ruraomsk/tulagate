@@ -64,7 +64,7 @@ type Programm struct {
 type Phase struct {
 	Number   int `json:"number"`   // номер фазы
 	Duration int `json:"duration"` // общая длительность фазы, ключая длительность всех промтактов
-	Type     int `json:"type"`     // 0 обычная фаза 1 фаза с ТВП 2 Замещабщая фаза
+	Type     int `json:"mode"`     // 0 обычная фаза 1 фаза с ТВП 2 Замещающая фаза
 	// TLGroups []Group `json:"tl_groups"` // массив групп светофоров
 }
 
