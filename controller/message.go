@@ -19,6 +19,7 @@ type Status struct {
 	Hold_phase_time_remain int     `json:"hold_phase_time_remain"` // Таймер обратного отсчета до конца удержания фазы, в сек
 	Has_loaded_daily_cards []int   `json:"has_loaded_daily_cards"` //Перечень загруженных суточных карт
 	Has_loaded_week_cards  []int   `json:"has_loaded_week_cards"`  //Перечень загруженных недельных карт
+	Is_transition          bool    `json:"is_transition"`          //Признак перехода
 }
 
 // Errors Описание ошибок
