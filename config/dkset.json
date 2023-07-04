@@ -67,6 +67,54 @@
             "id": 25
         },
         {
+            "idext": "C1230",
+            "work": true,
+            "area": 1,
+            "id": 30
+        },
+        {
+            "idext": "C128",
+            "work": true,
+            "area": 1,
+            "id": 28
+        },
+        {
+            "idext": "C1240",
+            "work": true,
+            "area": 1,
+            "id": 40
+        },
+        {
+            "idext": "C12100",
+            "work": true,
+            "area": 1,
+            "id": 100
+        },
+        {
+            "idext": "C1226",
+            "work": true,
+            "area": 1,
+            "id": 26
+        },
+        {
+            "idext": "C1235",
+            "work": true,
+            "area": 1,
+            "id": 35
+        },
+        {
+            "idext": "C1227",
+            "work": true,
+            "area": 1,
+            "id": 27
+        },
+        {
+            "idext": "C1229",
+            "work": true,
+            "area": 1,
+            "id": 29
+        },
+        {
             "idext": "C1241",
             "work": true,
             "area": 1,
