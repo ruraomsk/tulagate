@@ -17,8 +17,6 @@ import (
 	"github.com/ruraomsk/tulagate/uptransport"
 )
 
-var err error
-
 func (d *Device) worker() {
 	//При запуске сразу шлем СФДК
 	logger.Info.Printf("Начинаем работу %s %v", d.OneSet.IDExternal, d.Region)
@@ -181,6 +179,7 @@ func (d *Device) worker() {
 }
 func (d *Device) loadData() {
 	// logger.Debug.Printf("%d loadData", d.Cross.IDevice)
+	var err error
 	d.Cross, err = db.GetCross(d.Region)
 	if err != nil {
 		logger.Error.Print(err.Error())
@@ -188,9 +187,14 @@ func (d *Device) loadData() {
 	}
 	d.Ctrl, err = db.GetController(d.Cross.IDevice)
 	if err != nil {
+		if d.isMessage {
+			return
+		}
 		logger.Error.Print(err.Error())
+		d.isMessage = true
 		return
 	}
+	d.isMessage = false
 }
 func (d *Device) sendNotTransport() {
 	message := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "status", Body: "{}"}
