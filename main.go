@@ -22,7 +22,6 @@ import (
 	"github.com/ruraomsk/tulagate/device"
 	"github.com/ruraomsk/tulagate/setup"
 	"github.com/ruraomsk/tulagate/tester"
-	"github.com/ruraomsk/tulagate/tulastat"
 	"github.com/ruraomsk/tulagate/uptransport"
 )
 
@@ -83,7 +82,7 @@ func main() {
 	<-next
 	go uptransport.Starter()
 
-	tulastat.StatisticStart()
+	// tulastat.StatisticStart()
 
 	go device.Starter(&dkset, stop, next)
 	<-next
