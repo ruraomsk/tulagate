@@ -97,7 +97,7 @@ func controlConnect() {
 		case <-oneSecond.C:
 			if !workAmi {
 				if !sended {
-					// logger.Debug.Println("Начинаем считать время ")
+					logger.Debug.Println("Начинаем считать время ")
 					intervalTime = time.NewTimer(timeKeepAliveAmi)
 					sended = true
 				}
