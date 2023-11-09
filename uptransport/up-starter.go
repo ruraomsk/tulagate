@@ -3,6 +3,7 @@ package uptransport
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/ruraomsk/ag-server/logger"
@@ -84,6 +85,7 @@ func Starter() {
 		grpcConn.Close()
 		logger.Error.Printf("Связь с верхом оборвалась")
 		time.Sleep(5 * time.Second)
+		os.Exit(1)
 	}
 }
 func controlConnect() {
