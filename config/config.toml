@@ -8,14 +8,14 @@
 	timestat=10
 	test=false
 [dataBase]
-	host= "192.168.115.23"
+	host= "127.0.0.1"
 	port= 5432
 	user= "postgres"
 	password= "162747"
 	dbname= "agserv"
 	step=5
 [agserver]
-	host= "192.168.115.23"
+	host= "127.0.0.1"
 	portc= 2001					#Порт приема команд от сервера АРМ
 	porta= 2002					#Порт приема массивов привязки от сервера АРМ
     portd= 2004                 #Порт передачи фазы и времени серверу АРМ
