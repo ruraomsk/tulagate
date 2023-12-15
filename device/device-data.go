@@ -34,6 +34,7 @@ type Device struct {
 	Stat           statistic
 	LastMGR        int
 	isDUPK         bool //true если задан режин ДУ ПК
+	isMessage      bool
 }
 type statistic struct {
 	tp       int

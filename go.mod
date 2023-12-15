@@ -1,13 +1,13 @@
 module github.com/ruraomsk/tulagate
 
-go 1.18
+go 1.19
 
 require (
-	github.com/BurntSushi/toml v1.1.0
-	github.com/lib/pq v1.10.6
-	github.com/ruraomsk/ag-server v0.0.0-20220601040651-0ffa2dc6c3c0
-	google.golang.org/grpc v1.47.0
-	google.golang.org/protobuf v1.28.0
+	github.com/BurntSushi/toml v1.2.0
+	github.com/lib/pq v1.10.7
+	github.com/ruraomsk/ag-server v0.0.0-20220919022940-3842e1b8e5a1
+	google.golang.org/grpc v1.49.0
+	google.golang.org/protobuf v1.28.1
 )
 
 require (

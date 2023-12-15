@@ -24,7 +24,6 @@ func senderCommand() {
 		writer := bufio.NewWriter(socket)
 		tenSecond := time.NewTicker(10 * time.Second)
 		workSenderCommand = true
-
 		logger.Info.Print("senderCommand ready")
 	loop:
 		for {

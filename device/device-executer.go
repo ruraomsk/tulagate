@@ -147,10 +147,37 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 		logger.Error.Printf(err1)
 		return err1
 	}
+	if setter.Mode != 0 {
+		for i, v := range d.Cross.Arrays.SetDK.DK {
+			if v.Pk == setter.Number {
+				d.Cross.Arrays.SetDK.DK[i] = binding.NewSetPk(v.Pk)
+				d.Cross.Arrays.SetDK.DK[i].Tc = setter.Mode
+				d.Cross.Arrays.SetDK.DK[i].Shift = setter.Offset
+				d.Cross.Arrays.SetDK.DK[i].TypePU = 1
+				if setter.Is_Coordination {
+					d.Cross.Arrays.SetDK.DK[i].TypePU = 0
+				}
+				// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
+
+				agtransport.SendCross <- pudge.UserCross{State: d.Cross}
+				if setter.IsDefault {
+					db.SetBasePlan(d.Region, d.Cross.Arrays.SetDK, setter.Number)
+				}
+				return ""
+			}
+		}
+		err5 := fmt.Sprintf("%d нет такого плана в системе", setter.Number)
+		logger.Error.Printf(err5)
+		return err5
+
+	}
 	if len(setter.Phases) > 12 {
 		err2 := fmt.Sprintf("слишком много фаз в %d  не больше 12", setter.Number)
 		logger.Error.Printf(err2)
 		return err2
+	}
+	if setter.Mode != 0 {
+
 	}
 	// if !setter.IsEnabled {
 	// 	//Удаляем план создаем в нем ЛР
@@ -172,7 +199,9 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 	//считаем время цикла
 	tcycle := 0
 	for _, v := range setter.Phases {
-		tcycle += v.Duration
+		if v.Type != 2 {
+			tcycle += v.Duration
+		}
 	}
 	if tcycle == 0 {
 		for i, v := range d.Cross.Arrays.SetDK.DK {
@@ -226,7 +255,13 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 				if v.Number == 0 {
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 1
 				} else {
-					d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 0
+					if v.Type == 0 {
+						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 0
+					} else if v.Type == 1 {
+						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 2
+					} else if v.Type == 2 {
+						d.Cross.Arrays.SetDK.DK[i].Stages[j].Tf = 7
+					}
 				}
 				d.Cross.Arrays.SetDK.DK[i].Stages[j].Number = v.Number
 				if tnow+v.Duration >= tcycle {
@@ -238,8 +273,12 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 				} else {
 					tnow += v.Duration
 					d.Cross.Arrays.SetDK.DK[i].Stages[j].Stop = tnow
+					if v.Type == 2 {
+						tnow -= v.Duration
+					}
 				}
 			}
+
 			// logger.Debug.Print(d.Cross.Arrays.SetDK.DK[i])
 
 			agtransport.SendCross <- pudge.UserCross{State: d.Cross}

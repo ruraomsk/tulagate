@@ -17,8 +17,6 @@ import (
 	"github.com/ruraomsk/tulagate/uptransport"
 )
 
-var err error
-
 func (d *Device) worker() {
 	//При запуске сразу шлем СФДК
 	logger.Info.Printf("Начинаем работу %s %v", d.OneSet.IDExternal, d.Region)
@@ -156,7 +154,7 @@ func (d *Device) worker() {
 			case "SwitchProgram":
 				d.sendReplayToAmiWithStatus(d.executeSwitchProgram(message))
 			case "UploadPrograms":
-				message = d.insertMGR(message)
+				// message = d.insertMGR(message)
 				// d.sendReplayToAmi(d.executeUploadPrograms(message))
 				d.sendReplayToAmiWithStatus(d.executeUploadPrograms(message))
 			case "GetCoordination":
@@ -181,6 +179,7 @@ func (d *Device) worker() {
 }
 func (d *Device) loadData() {
 	// logger.Debug.Printf("%d loadData", d.Cross.IDevice)
+	var err error
 	d.Cross, err = db.GetCross(d.Region)
 	if err != nil {
 		logger.Error.Print(err.Error())
@@ -188,9 +187,14 @@ func (d *Device) loadData() {
 	}
 	d.Ctrl, err = db.GetController(d.Cross.IDevice)
 	if err != nil {
+		if d.isMessage {
+			return
+		}
 		logger.Error.Print(err.Error())
+		d.isMessage = true
 		return
 	}
+	d.isMessage = false
 }
 func (d *Device) sendNotTransport() {
 	message := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "status", Body: "{}"}
@@ -205,7 +209,8 @@ func (d *Device) sendNotTransport() {
 }
 func (d *Device) sendStatus() controller.MessageToAmi {
 	message := controller.MessageToAmi{IDExternal: d.OneSet.IDExternal, Action: "status", Body: "{}"}
-	status := controller.Status{Program_number: d.Cross.PK, Phase_number: d.DK.FDK, Has_Default_Programs: make([]int, 0), Has_Loaded_Programs: make([]int, 0)}
+	status := controller.Status{Program_number: d.Cross.PK, Phase_number: d.DK.FDK, Is_transition: d.DK.PDK,
+		Has_Default_Programs: make([]int, 0), Has_Loaded_Programs: make([]int, 0)}
 	if status.Phase_number > 8 {
 		status.Phase_number = 0
 	}
@@ -311,6 +316,9 @@ func (d *Device) sendStatus() controller.MessageToAmi {
 		if d.DK.FDK > 9 {
 			logger.Error.Printf("fdk=%d нужна перекодировка!", d.DK.FDK)
 		}
+	}
+	if d.DK.FTUDK == 0 {
+		status.Mode = 1
 	}
 	// logger.Debug.Printf("%v rdk=%d fdk=%d mode=%d", d.Region, d.DK.RDK, d.DK.FDK, status.Mode)
 	status.Has_Default_Programs = db.LoadBaseProgramm(d.Region)

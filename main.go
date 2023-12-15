@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"runtime"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -23,7 +22,6 @@ import (
 	"github.com/ruraomsk/tulagate/device"
 	"github.com/ruraomsk/tulagate/setup"
 	"github.com/ruraomsk/tulagate/tester"
-	"github.com/ruraomsk/tulagate/tulastat"
 	"github.com/ruraomsk/tulagate/uptransport"
 )
 
@@ -84,7 +82,7 @@ func main() {
 	<-next
 	go uptransport.Starter()
 
-	tulastat.StatisticStart()
+	// tulastat.StatisticStart()
 
 	go device.Starter(&dkset, stop, next)
 	<-next
@@ -94,11 +92,21 @@ func main() {
 	}
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt,
-		syscall.SIGQUIT,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		syscall.SIGHUP)
+	if strings.Contains(runtime.GOOS, "linux") {
+		signal.Notify(c, os.Interrupt)
+		// ,
+		// 	syscall.SIGQUIT,
+		// 	syscall.SIGINT,
+		// 	syscall.SIGTERM)
+
+	} else {
+		signal.Notify(c, os.Interrupt)
+		// ,
+		// 	syscall.SIGQUIT,
+		// 	syscall.SIGINT,
+		// 	syscall.SIGTERM,
+		// 	syscall.SIGHUP)
+	}
 loop:
 	for {
 		<-c

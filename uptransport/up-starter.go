@@ -3,6 +3,7 @@ package uptransport
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/ruraomsk/ag-server/logger"
@@ -40,7 +41,7 @@ func Starter() {
 		ctx1, _ := context.WithTimeout(context.Background(), time.Second*60)
 		grpcConn, err := grpc.DialContext(ctx1, grpcURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
-			logger.Error.Panicf("процедура подключения к gRPC завершена с ошибкой: %s", err.Error())
+			logger.Error.Printf("процедура подключения к gRPC завершена с ошибкой: %s", err.Error())
 			time.Sleep(time.Second)
 			continue
 		}
@@ -84,6 +85,7 @@ func Starter() {
 		grpcConn.Close()
 		logger.Error.Printf("Связь с верхом оборвалась")
 		time.Sleep(5 * time.Second)
+		os.Exit(1)
 	}
 }
 func controlConnect() {
@@ -97,7 +99,7 @@ func controlConnect() {
 		case <-oneSecond.C:
 			if !workAmi {
 				if !sended {
-					// logger.Debug.Println("Начинаем считать время ")
+					logger.Debug.Println("Начинаем считать время ")
 					intervalTime = time.NewTimer(timeKeepAliveAmi)
 					sended = true
 				}

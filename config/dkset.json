@@ -1,29 +1,142 @@
 {
     "dkset": [
         {
-            "idext": "C12D1",
+            "idext": "C1201",
+            "work": true,
             "area": 1,
             "id": 1
         },
         {
-            "idext": "C12D2",
+            "idext": "C1202",
+            "work": true,
             "area": 1,
             "id": 2
         },
         {
-            "idext": "C12D3",
+            "idext": "C1203",
+            "work": true,
             "area": 1,
             "id": 3
         },
         {
-            "idext": "C12D4",
+            "idext": "C1204",
+            "work": true,
             "area": 1,
             "id": 4
         },
         {
-            "idext": "C12D5",
+            "idext": "C1205",
+            "work": true,
             "area": 1,
             "id": 5
+        },
+        {
+            "idext": "C1206",
+            "work": true,
+            "area": 1,
+            "id": 6
+        },
+        {
+            "idext": "C1210",
+            "work": true,
+            "area": 1,
+            "id": 10
+        },
+        {
+            "idext": "C1221",
+            "work": true,
+            "area": 1,
+            "id": 21
+        },
+        {
+            "idext": "C1222",
+            "work": true,
+            "area": 1,
+            "id": 22
+        },
+        {
+            "idext": "C1223",
+            "work": true,
+            "area": 1,
+            "id": 23
+        },
+        {
+            "idext": "C1225",
+            "work": true,
+            "area": 1,
+            "id": 25
+        },
+        {
+            "idext": "C1230",
+            "work": true,
+            "area": 1,
+            "id": 30
+        },
+        {
+            "idext": "C1228",
+            "work": true,
+            "area": 1,
+            "id": 28
+        },
+        {
+            "idext": "C1240",
+            "work": true,
+            "area": 1,
+            "id": 40
+        },
+        {
+            "idext": "C12100",
+            "work": true,
+            "area": 1,
+            "id": 100
+        },
+        {
+            "idext": "C1226",
+            "work": true,
+            "area": 1,
+            "id": 26
+        },
+        {
+            "idext": "C1235",
+            "work": true,
+            "area": 1,
+            "id": 35
+        },
+        {
+            "idext": "C1227",
+            "work": true,
+            "area": 1,
+            "id": 27
+        },
+        {
+            "idext": "C1229",
+            "work": true,
+            "area": 1,
+            "id": 29
+        },
+        {
+            "idext": "C1241",
+            "work": true,
+            "area": 1,
+            "id": 41
+        },
+        {
+            "idext": "C1242",
+            "work": true,
+            "area": 1,
+            "id": 42
+        },
+        {
+            "idext": "C1251",
+            "work": true,
+            "area": 1,
+            "id": 51
+        },
+        {
+            "idext": "C1252",
+            "work": true,
+            "area": 1,
+            "id": 52
         }
     ]
 }

@@ -12,10 +12,13 @@ import (
 func (d *Device) executeGetCoordination() []controller.Programm {
 	result := make([]controller.Programm, 0)
 	for _, v := range d.Cross.Arrays.SetDK.DK {
-		if v.Tc <= 3 {
+		if v.Tc <= 2 {
+			plan := controller.Programm{Number: v.Pk, Offset: v.Shift, Phases: make([]controller.Phase, 0), Is_Coordination: false, Mode: v.Tc}
+			result = append(result, plan)
 			continue
 		}
-		plan := controller.Programm{Number: v.Pk, Offset: v.Shift, Phases: make([]controller.Phase, 0), Is_Coordination: false}
+
+		plan := controller.Programm{Number: v.Pk, Offset: v.Shift, Phases: make([]controller.Phase, 0), Is_Coordination: false, Mode: 0}
 		if v.TypePU == 0 {
 			plan.Is_Coordination = true
 		}
@@ -32,7 +35,15 @@ func (d *Device) executeGetCoordination() []controller.Programm {
 				// logger.Debug.Print(plan.Phases)
 				continue
 			}
-			phase = controller.Phase{Duration: ph.Stop - ph.Start + ph.Dt, Number: ph.Number}
+			tf := 0
+			if ph.Tf == 2 {
+				tf = 1
+			}
+			if ph.Tf == 7 || ph.Tf == 5 || ph.Tf == 6 {
+				// logger.Debug.Printf("ph.Tf==%d", ph.Tf)
+				tf = 2
+			}
+			phase = controller.Phase{Duration: ph.Stop - ph.Start + ph.Dt, Number: ph.Number, Type: tf}
 			plan.Phases = append(plan.Phases, phase)
 		}
 		result = append(result, plan)

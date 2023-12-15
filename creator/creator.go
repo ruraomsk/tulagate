@@ -90,8 +90,9 @@ func Creator(dks *controller.DKSet) {
 			cross.Arrays.DaySets.DaySets[0].Lines[0].Hour = 24
 			cross.Arrays.DaySets.DaySets[0].Lines[0].Min = 0
 			cross.Arrays.DaySets.DaySets[0].Lines[0].PKNom = 1
-
-			cross.Arrays.SetDK = *binding.NewSetDK()
+			if cross.ID != 1 && cross.ID != 4 && cross.ID != 52 && cross.ID != 30 {
+				cross.Arrays.SetDK = *binding.NewSetDK()
+			}
 			found = true
 		}
 		if !found {

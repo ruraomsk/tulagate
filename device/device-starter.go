@@ -18,11 +18,15 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 	devices = make(map[pudge.Region]Device)
 
 	for _, v := range dks.DKSets {
+		if !v.Work {
+			continue
+		}
 		region := pudge.Region{Region: setup.Set.Region, Area: v.Area, ID: v.ID}
 		device := Device{OneSet: v, Region: region, DevPhases: make(chan comm.DevPhases),
 			MessageForMe: make(chan controller.MessageFromAmi, 10), ErrorTech: make([]string, 0), LastSendStatus: time.Now(),
 			LastReciveStat: time.Now(), clear: make(chan interface{}), MGRS: make(map[int]binding.MGR)}
 		device.Stat = statistic{tp: 1, interval: 300, count: 0}
+		device.isMessage = false
 		device.initStatistic()
 		cross, err := db.GetCross(region)
 		if err != nil {
@@ -34,6 +38,7 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 		if err != nil {
 			logger.Error.Print(err.Error())
 			device.Cross.StatusDevice = 18
+			device.isMessage = true
 		} else {
 			device.Ctrl = ctrl
 		}

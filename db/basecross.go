@@ -102,7 +102,7 @@ func GetStartCross(region pudge.Region) (pudge.Cross, error) {
 	if !found {
 		//Значит произведем заготовку
 		cross, _ = GetCross(region)
-		ClearPKs(&cross)
+		// ClearPKs(&cross)
 	}
 	if !found {
 		state, _ = json.Marshal(cross)
