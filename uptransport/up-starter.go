@@ -28,8 +28,8 @@ var timeKeepAliveAmi time.Duration
 
 func Starter() {
 	count := 0
-	SendToAmiChan = make(chan controller.MessageToAmi, 1000)
-	internalSendToAmiChan = make(chan controller.MessageToAmi, 1000)
+	SendToAmiChan = make(chan controller.MessageToAmi)
+	internalSendToAmiChan = make(chan controller.MessageToAmi)
 	DebugStopAmi = make(chan interface{})
 	timeKeepAliveAmi = time.Duration(setup.Set.TimeKeepAliveAmi) * time.Second
 	workAmi = false
@@ -134,6 +134,7 @@ func SendToAmi(stream proto.AMI_RunClient) {
 			workAmi = false
 			return
 		case message := <-internalSendToAmiChan:
+			logger.Debug.Printf("send to %v", message)
 			err := stream.Send(&proto.RequestRun{ControllerId: message.IDExternal, Action: message.Action, Body: message.Body, Protocol: "DKST"})
 			if err != nil {
 				logger.Error.Println(err.Error())

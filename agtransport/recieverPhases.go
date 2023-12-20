@@ -20,10 +20,10 @@ func recieverPhases() {
 	sending = make(map[int]bool)
 	w := fmt.Sprintf("%s:%d", setup.Set.AgServer.Host, setup.Set.AgServer.PortDevices)
 	for {
+		time.Sleep(15 * time.Second)
 		socket, err := net.Dial("tcp", w)
 		if err != nil {
 			logger.Error.Printf("connect %s %s ", w, err.Error())
-			time.Sleep(5 * time.Second)
 			continue
 		}
 		reader := bufio.NewReader(socket)
@@ -46,7 +46,7 @@ func recieverPhases() {
 				logger.Error.Printf("%s %s", socket.RemoteAddr().String(), err.Error())
 				break
 			}
-			// logger.Debug.Printf("receive %v", phases)
+			logger.Debug.Printf("receive %v", phases)
 			ch, err := db.GetChanReceivePhases(phases.ID)
 			if err != nil {
 				_, is := sending[phases.ID]
