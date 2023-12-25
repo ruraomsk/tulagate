@@ -134,7 +134,7 @@ func SendToAmi(stream proto.AMI_RunClient) {
 			workAmi = false
 			return
 		case message := <-internalSendToAmiChan:
-			logger.Debug.Printf("send to %v", message)
+			// logger.Debug.Printf("send to %v", message)
 			err := stream.Send(&proto.RequestRun{ControllerId: message.IDExternal, Action: message.Action, Body: message.Body, Protocol: "DKST"})
 			if err != nil {
 				logger.Error.Println(err.Error())
