@@ -139,7 +139,6 @@ func (d *Device) worker() {
 			d.DK = dk.DK
 			d.loadData()
 			// logger.Debug.Printf("%v ", dk)
-			uptransport.SendToAmiChan <- d.sendStatus()
 		case message := <-d.MessageForMe:
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()
@@ -168,13 +167,14 @@ func (d *Device) worker() {
 				d.sendReplayToAmiWithStatus(d.executeUploadWeekCards(message))
 			case "Config":
 				d.sendReplayToAmiWithStatus(d.executeConfig(message))
+			case "status":
+				uptransport.SendToAmiChan <- d.sendStatus()
 			default:
 				s := fmt.Sprintf("%s not supported", message.Action)
 				logger.Error.Printf(s)
 				d.sendReplayToAmiWithStatus(s)
 			}
 		}
-
 	}
 }
 func (d *Device) loadData() {
