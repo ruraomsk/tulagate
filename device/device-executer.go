@@ -176,9 +176,9 @@ func (d *Device) executeUploadPrograms(message controller.MessageFromAmi) string
 		logger.Error.Printf(err2)
 		return err2
 	}
-	if setter.Mode != 0 {
+	// if setter.Mode != 0 {
 
-	}
+	// }
 	// if !setter.IsEnabled {
 	// 	//Удаляем план создаем в нем ЛР
 	// 	for i, v := range d.Cross.Arrays.SetDK.DK {
