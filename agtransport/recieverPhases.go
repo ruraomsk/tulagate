@@ -30,21 +30,22 @@ func recieverPhases() {
 		logger.Info.Print("recieverPhases ready")
 
 		var phases comm.DevPhases
+	loop:
 		for {
 			str, err := reader.ReadString('\n')
 			if err != nil {
 				logger.Error.Printf("%s %s", socket.RemoteAddr().String(), err.Error())
-				break
+				break loop
 			}
 			str = strings.ReplaceAll(str, "\n", "")
 			if strings.Compare(str, "0") == 0 {
 				//keep alive
-				continue
+				continue loop
 			}
 			err = json.Unmarshal([]byte(str), &phases)
 			if err != nil {
 				logger.Error.Printf("%s %s", socket.RemoteAddr().String(), err.Error())
-				break
+				break loop
 			}
 			// logger.Debug.Printf("receive %v", phases)
 			ch, err := db.GetChanReceivePhases(phases.ID)
@@ -54,7 +55,7 @@ func recieverPhases() {
 					logger.Error.Printf("%s %s", socket.RemoteAddr().String(), err.Error())
 					sending[phases.ID] = true
 				}
-				continue
+				continue loop
 			}
 			_, is := sending[phases.ID]
 			if is {
