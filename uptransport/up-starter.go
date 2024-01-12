@@ -77,8 +77,10 @@ func Starter() {
 				logger.Error.Print(err.Error())
 				continue
 			}
+			// logger.Debug.Printf("recv %v %v", recv.ControllerId, controller.MessageFromAmi{Action: recv.Action, Body: recv.Body})
 			ch <- controller.MessageFromAmi{Action: recv.Action, Body: recv.Body}
-			// logger.Debug.Printf("recv %v", controller.MessageFromAmi{Action: recv.Action, Body: recv.Body})
+			// logger.Debug.Printf("ok")
+
 		}
 		stream.CloseSend()
 		workAmi = false
@@ -117,7 +119,9 @@ func controlConnect() {
 				intervalTime = time.NewTimer(timeKeepAliveAmi)
 			}
 		case <-intervalTime.C:
-			db.AllStops()
+			logger.Error.Printf("Нет обмена с верхом....")
+			time.Sleep(5 * time.Second)
+			os.Exit(1)
 		}
 	}
 }

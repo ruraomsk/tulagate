@@ -16,10 +16,9 @@ var (
 
 func Starter(next chan interface{}) {
 	CommandARM = make(chan pudge.CommandARM, 1000)
-	internalCommandARM = make(chan pudge.CommandARM)
-	SendCross = make(chan pudge.UserCross, 100)
-	internalSendCross = make(chan pudge.UserCross)
-	internalCommandARM = make(chan pudge.CommandARM)
+	internalCommandARM = make(chan pudge.CommandARM, 1000)
+	SendCross = make(chan pudge.UserCross, 1000)
+	internalSendCross = make(chan pudge.UserCross, 1000)
 	go senderArrays()
 	go senderCommand()
 	go recieverPhases()

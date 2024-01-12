@@ -22,8 +22,8 @@ func Starter(dks *controller.DKSet, stop chan interface{}, next chan interface{}
 			continue
 		}
 		region := pudge.Region{Region: setup.Set.Region, Area: v.Area, ID: v.ID}
-		device := Device{OneSet: v, Region: region, DevPhases: make(chan comm.DevPhases, 100),
-			MessageForMe: make(chan controller.MessageFromAmi, 10), ErrorTech: make([]string, 0), LastSendStatus: time.Now(),
+		device := Device{OneSet: v, Region: region, DevPhases: make(chan comm.DevPhases),
+			MessageForMe: make(chan controller.MessageFromAmi), ErrorTech: make([]string, 0), LastSendStatus: time.Now(),
 			LastReciveStat: time.Now(), clear: make(chan interface{}), MGRS: make(map[int]binding.MGR)}
 		device.Stat = statistic{tp: 1, interval: 300, count: 0}
 		device.isMessage = false

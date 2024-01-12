@@ -65,10 +65,10 @@ func (d *Device) worker() {
 				}
 			}
 		case <-tickOneSecond.C:
-			ptime := TimeNowOfSecond()
-			if ptime%d.Stat.interval == 0 {
-				d.sendStatistics(ptime)
-			}
+			// ptime := TimeNowOfSecond()
+			// if ptime%d.Stat.interval == 0 {
+			// 	d.sendStatistics(ptime)
+			// }
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()
 				continue
@@ -90,35 +90,33 @@ func (d *Device) worker() {
 					}
 				}
 			}
-			// if time.Since(d.LastSendStatus) > sendStatus {
-			// 	uptransport.SendToAmiChan <- d.sendStatus()
-			// }
+
 			d.loadData()
 			if !d.Ctrl.IsConnected() {
 				continue
 			}
-			if setup.Set.MGRSet {
-				mgr := d.Stat.nowStat.getMGRword()
-				d.Stat.nowStat.init()
-				if mgr != 0 {
-					agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0e, Params: mgr}
-				}
-			}
-			if setup.Set.MGRSet {
-				if time.Since(d.LastReciveStat) > time.Duration(setup.Set.TimeKeepStatistic)*time.Second {
-					//нет МГР
-					if d.LastMGR == 1 {
-						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
-						d.LastMGR = 0
-					}
-				} else {
-					//есть МГР
-					if d.LastMGR == 0 {
-						agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
-						d.LastMGR = 1
-					}
-				}
-			}
+			// if setup.Set.MGRSet {
+			// 	mgr := d.Stat.nowStat.getMGRword()
+			// 	d.Stat.nowStat.init()
+			// 	if mgr != 0 {
+			// 		agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0e, Params: mgr}
+			// 	}
+			// }
+			// if setup.Set.MGRSet {
+			// 	if time.Since(d.LastReciveStat) > time.Duration(setup.Set.TimeKeepStatistic)*time.Second {
+			// 		//нет МГР
+			// 		if d.LastMGR == 1 {
+			// 			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 1}
+			// 			d.LastMGR = 0
+			// 		}
+			// 	} else {
+			// 		//есть МГР
+			// 		if d.LastMGR == 0 {
+			// 			agtransport.CommandARM <- pudge.CommandARM{ID: d.Cross.IDevice, Command: 0x0f, Params: 0}
+			// 			d.LastMGR = 1
+			// 		}
+			// 	}
+			// }
 
 		case <-tickSFDK.C:
 			if !agtransport.ReadyAgTransport() {
@@ -140,11 +138,11 @@ func (d *Device) worker() {
 			d.loadData()
 			// logger.Debug.Printf("%v ", dk)
 		case message := <-d.MessageForMe:
+			// logger.Debug.Printf("%v %v", d.Region, message)
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()
 				continue
 			}
-			logger.Debug.Printf("%v %v", d.Region, message)
 			switch message.Action {
 			case "SetMode":
 				d.sendReplayToAmiWithStatus(d.executeSetMode(message))
