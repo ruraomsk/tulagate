@@ -138,10 +138,12 @@ func (d *Device) worker() {
 			d.loadData()
 			// logger.Debug.Printf("%v ", dk)
 		case message := <-d.MessageForMe:
-			// logger.Debug.Printf("%v %v", d.Region, message)
 			if !agtransport.ReadyAgTransport() {
 				d.sendNotTransport()
 				continue
+			}
+			if message.Action != "status" {
+				logger.Debug.Printf("%v %v", d.Region, message)
 			}
 			switch message.Action {
 			case "SetMode":
